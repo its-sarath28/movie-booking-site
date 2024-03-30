@@ -1,4 +1,4 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const MoviesSchema = new Schema(
   {
@@ -34,8 +34,8 @@ const MoviesSchema = new Schema(
       type: Boolean,
       required: true,
     },
-    daySlots: {
-      type: Array,
+    date: {
+      type: String,
       required: true,
     },
   },

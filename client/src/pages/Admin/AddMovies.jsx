@@ -12,6 +12,7 @@ const AddMovies = () => {
     name: "",
     date: "",
     photo: "",
+    price: "",
     description: "",
     firstShow: false,
     matineeShow: false,
@@ -109,7 +110,7 @@ const AddMovies = () => {
 
         if (response.status === 200) {
           setIsLoading(false);
-          navigate("/admin/home");
+          navigate("/admin/dashboard");
           toast.success(`Movie added successfully`);
         }
       }
@@ -131,7 +132,7 @@ const AddMovies = () => {
             <h3 className="mb-4">Add Movie</h3>
             <div className="row">
               <div className="col-md-6">
-                <div className="">
+                <div>
                   <input
                     type="text"
                     name="name"
@@ -213,33 +214,49 @@ const AddMovies = () => {
               </div>
             </div>
 
-            <div className="my-2 d-flex align-items-center gap-3">
-              {previewURL && (
-                <figure className="avatar-img d-flex mt-2">
-                  <img
-                    src={previewURL}
-                    alt="avatar"
-                    className="w-100 object-fit-cover rounded-circle"
-                  />
-                </figure>
-              )}
+            <div className="mb-3">
+              <div className="row row-cols-sm-2 align-items-center">
+                <div className="col-md-6 d-flex align-items-center justify-content-start">
+                  {previewURL && (
+                    <figure className="avatar-img d-flex mt-2">
+                      <img
+                        src={previewURL}
+                        alt="avatar"
+                        className="w-100 object-fit-cover rounded-circle"
+                      />
+                    </figure>
+                  )}
 
-              <div className="p-0 m-0">
-                <input
-                  type="file"
-                  name="photo"
-                  id="customFile"
-                  accept=".jpg, .png, .jpeg"
-                  className="d-none absolute top-0 left-0 cursor-pointer"
-                  onChange={handleFileInputChange}
-                />
+                  <div className="p-0 m-0">
+                    <input
+                      type="file"
+                      name="photo"
+                      id="customFile"
+                      accept=".jpg, .png, .jpeg"
+                      className="d-none absolute top-0 left-0 cursor-pointer"
+                      onChange={handleFileInputChange}
+                    />
 
-                <label
-                  htmlFor="customFile"
-                  className="p-2 overflow-hidden bg-secondary text-white font-semibold rounded"
-                >
-                  Upload photo
-                </label>
+                    <label
+                      htmlFor="customFile"
+                      className="p-2 overflow-hidden bg-secondary text-white font-semibold rounded"
+                    >
+                      Upload photo
+                    </label>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="">
+                    <input
+                      type="number"
+                      name="price"
+                      placeholder="Ticket price"
+                      className="form-control"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

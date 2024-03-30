@@ -33,6 +33,7 @@ export const addMovieController = async (req, res, next) => {
     name,
     date,
     photo,
+    price,
     description,
     firstShow,
     matineeShow,
@@ -50,14 +51,15 @@ export const addMovieController = async (req, res, next) => {
 
     await Movies.create({
       name,
-      daySlots: date,
+      date,
       photo,
+      price,
       description,
       firstShow,
       matineeShow,
       eveningShow,
       nightShow,
-      price: 120,
+      price,
     });
 
     res
@@ -69,35 +71,18 @@ export const addMovieController = async (req, res, next) => {
   }
 };
 
-// export const addMovieController = async (req, res, next) => {
-//   const { name, description, date, time, photo } = req.body;
-//   try {
-//     const existingMovie = await Movies.findOne({ name });
-
-//     if (existingMovie) {
-//       return next(appError("Movie already exists"));
-//     }
-
-//     await Movies.create({
-//       name,
-//       description,
-//       photo,
-//       daySlots: date,
-//       timeSlots: time,
-//       price: 120,
-//     });
-
-//     res
-//       .status(200)
-//       .json({ success: true, message: "Movie added successfully" });
-//   } catch (err) {
-//     console.log(err);
-//     next(appError(err.message));
-//   }
-// };
-
 export const editMovieController = async (req, res, next) => {
-  const { name, description, daySlots, photo, timeSlots } = req.body;
+  const {
+    name,
+    date,
+    photo,
+    price,
+    description,
+    firstShow,
+    matineeShow,
+    eveningShow,
+    nightShow,
+  } = req.body;
   try {
     const movieToUpdate = await Movies.findById(req.params.movieId);
 
@@ -109,10 +94,14 @@ export const editMovieController = async (req, res, next) => {
       req.params.movieId,
       {
         name,
-        description,
-        daySlots,
+        date,
         photo,
-        timeSlots,
+        price,
+        description,
+        firstShow,
+        matineeShow,
+        eveningShow,
+        nightShow,
       },
       {
         new: true,
@@ -141,6 +130,25 @@ export const deleteMovieController = async (req, res, next) => {
     res
       .status(200)
       .json({ success: true, message: "Movie deleted successfully" });
+  } catch (err) {
+    console.log(err);
+    next(appError(err.message));
+  }
+};
+
+// Endpoint to fetch available dates
+export const fetchAvailableDatesController = async (req, res, next) => {
+  try {
+    const dates = await Movies.find({}, { _id: 0, date: 1 });
+    const arrayOfDates = dates.map((obj) => obj.date);
+
+    // Remove duplicates from the array using Set
+    const uniqueDates = [...new Set(arrayOfDates)];
+
+    // Sort unique dates in ascending order
+    uniqueDates.sort((a, b) => new Date(a) - new Date(b));
+
+    res.status(200).json(uniqueDates);
   } catch (err) {
     console.log(err);
     next(appError(err.message));

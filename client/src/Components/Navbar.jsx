@@ -11,7 +11,7 @@ const Navbar = () => {
       <div className="container-fluid ">
         <Link
           className="navbar-brand fw-bolder m-0"
-          to={role === "admin" ? "/admin/home" : "/"}
+          to={role === "admin" ? "/admin/dashboard" : "/"}
         >
           BookMyMovie
         </Link>

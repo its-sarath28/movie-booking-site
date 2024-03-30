@@ -23,6 +23,7 @@ const AdminHome = () => {
 
           if (res.status === 200) {
             setMovies(res.data);
+            console.log(res.data);
             setIsLoading(false);
           }
         };
@@ -37,7 +38,7 @@ const AdminHome = () => {
   }, [token, role, navigate]);
   return (
     <div className="container py-5">
-      <div className="row">
+      <div className="row mb-5">
         <div className="col d-flex justify-content-center justify-content-md-end align-items-center">
           <Link
             to={"/add-movie"}
@@ -48,95 +49,78 @@ const AdminHome = () => {
         </div>
       </div>
 
-      {/* <div className="row mt-5 d-flex justify-content-center">
-        <div className="col-12 col-md-12">
-          <div className="table-responsive">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Movie name</th>
-                  <th scope="col">Date</th>
-                  <th scope="col">Time</th>
-                  <th scope="col">Price</th>
-                  <th scope="col">Description</th>
-                  <th scope="col">Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {!isLoading && movies.length === 0 && (
-                  <tr className="align-middle">
-                    <td colSpan={7}>
-                      <p className="text-center mb-0">No data found.</p>
-                    </td>
-                  </tr>
-                )}
-
-                {!isLoading &&
-                  movies.map((movie, index) => (
-                    <tr key={movie._id} className="align-middle">
-                      <th scope="row">{index + 1}</th>
-                      <td>{movie.name}</td>
-                      <td>{movie.daySlots}</td>
-                      <td>
-                        {movie.timeSlots.map((time, index) => (
-                          <p key={index}>{time}</p>
-                        ))}
-                      </td>
-                      <td>{movie.price}</td>
-                      <td>{movie.description}</td>
-                      <td className="d-flex flex-column flex-md-row gap-3">
-                        <Link
-                          to={`/edit-movie/${movie._id}`}
-                          className="btn btn-primary"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          className="btn btn-danger"
-                          data-bs-toggle="modal"
-                          data-bs-target="#deleteModal"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div> */}
-
       <div className="row row-cols-1 row-cols-md-3 g-4">
-        {movies?.map(({ _id: id, name, photo, description }) => (
-          <div className="col" key={id}>
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">{name}</h5>
-                <p className="card-text">{description}</p>
-                <p className="card-text">11: 30 AM (Running)</p>
-                <p className="card-text">2: 30 PM (Running)</p>
-                <p className="card-text">5 PM (Running)</p>
-                <p className="card-text">9 PM (Running)</p>
-              </div>
+        {movies?.map(
+          ({
+            _id: id,
+            name,
+            date,
+            firstShow,
+            matineeShow,
+            eveningShow,
+            nightShow,
+          }) => (
+            <div className="col" key={id}>
+              <div className="card">
+                <div className="card-body">
+                  <h5 className="card-title">{name}</h5>
+                  <p>
+                    On <span className="fw-bold">{date}</span>
+                  </p>
+                  <p className="card-text">
+                    11: 30 AM (
+                    {firstShow === true ? (
+                      <span className="text-success">Running</span>
+                    ) : (
+                      <span className="text-danger">Disbled</span>
+                    )}
+                    )
+                  </p>
+                  <p className="card-text">
+                    2: 30 PM (
+                    {matineeShow === true ? (
+                      <span className="text-success">Running</span>
+                    ) : (
+                      <span className="text-danger">Disbled</span>
+                    )}
+                    )
+                  </p>
+                  <p className="card-text">
+                    5 PM (
+                    {eveningShow === true ? (
+                      <span className="text-success">Running</span>
+                    ) : (
+                      <span className="text-danger">Disbled</span>
+                    )}
+                    )
+                  </p>
+                  <p className="card-text">
+                    9 PM (
+                    {nightShow === true ? (
+                      <span className="text-success">Running</span>
+                    ) : (
+                      <span className="text-danger">Disbled</span>
+                    )}
+                    )
+                  </p>
+                </div>
 
-              <div className="d-flex gap-2 ps-3 pb-3">
-                <Link to={`/edit-movie/`} className="btn btn-primary">
-                  Edit
-                </Link>
-                <button
-                  className="btn btn-danger"
-                  data-bs-toggle="modal"
-                  data-bs-target="#deleteModal"
-                >
-                  Delete
-                </button>
+                <div className="d-flex gap-2 ps-3 pb-3">
+                  <Link to={`/edit-movie/${id}`} className="btn btn-primary">
+                    Edit
+                  </Link>
+                  <button
+                    className="btn btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteModal"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
     </div>
   );

@@ -1,28 +1,165 @@
-import React, { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import HashLoader from "react-spinners/HashLoader";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
-import movie from "../../assets/images/movie-5.jpeg";
+import { BASE_URL } from "../../config";
+import toast from "react-hot-toast";
+import { UserContext } from "../../context/userContext";
 
 const ViewShowDetails = () => {
-  // State variables for selected date and time
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [movieData, setMovieData] = useState({
+    name: "",
+    description: "",
+    photo: "",
+    date: "",
+    firstShow: null,
+    matineeShow: null,
+    eveningShow: null,
+    nightShow: null,
+    ticketNumber: 0,
+  });
 
-  // Function to handle date selection
-  const handleDateSelect = (date) => {
-    setSelectedDate(date);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [ticketPrice, setTicketPrice] = useState(0);
+
+  const { isLoggedIn } = useContext(UserContext);
+
+  const token = isLoggedIn;
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { movieId } = useParams();
+
+  useEffect(() => {
+    try {
+      setIsLoading(true);
+      const getSingleMovieData = async () => {
+        const res = await axios.get(`${BASE_URL}/movies/${movieId}`);
+
+        if (res.status === 200) {
+          setMovieData(res.data);
+          setTicketPrice(res.data.price);
+          setIsLoading(false);
+          console.log(res.data);
+        }
+      };
+
+      getSingleMovieData();
+    } catch (err) {
+      setIsLoading(false);
+      console.error(err);
+      toast.error("Something went wrong!");
+    }
+  }, []);
+
+  const handleInputChange = (e) => {
+    setMovieData({ ...movieData, [e.target.name]: e.target.value });
   };
 
-  // Function to handle time selection
-  const handleTimeSelect = (time) => {
+  const handleTimeSelect = (time, e) => {
+    e.preventDefault();
     setSelectedTime(time);
   };
 
-  // Dummy data for dates and times (replace with actual data)
-  const dates = ["2024-04-01", "2024-04-02", "2024-04-03"];
-  const times = ["10:00 AM", "01:00 PM", "04:00 PM"];
+  const times = ["11:30 AM", "02:30 PM", "5 PM", "9 PM"];
 
-  const bookTicketHandler = (e) => {
+  const bookTicketHandler = async (e) => {
     e.preventDefault();
+
+    if (isNaN(movieData.ticketNumber) || movieData.ticketNumber < 1) {
+      toast.error(`Please enter a valid Number of tickets`);
+      return;
+    }
+
+    const amount = ticketPrice * movieData.ticketNumber * 100;
+    const currency = "INR";
+    const receiptId = "1234567890";
+
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/bookings/book-ticket`,
+        {
+          amount,
+          currency,
+          receipt: receiptId,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const order = res.data;
+      console.log(order);
+
+      var options = {
+        key: "",
+        amount,
+        currency,
+        name: "BookMyMovie",
+        description: "Test transaction",
+        image: "https://i.ibb..co/5Y3m33n/test.png",
+        order_id: order.id,
+        handler: async (res) => {
+          const body = {
+            ...res,
+            movieId,
+            numberOfTickets: movieData.ticketNumber,
+            showTime: selectedTime,
+            showDate: movieData.date,
+          };
+          try {
+            const validateResponse = await axios.post(
+              `${BASE_URL}/bookings/validate-payment`,
+              body,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            const jsonResponse = validateResponse.data;
+            const jsonResponseStatus = validateResponse.status;
+            console.log(`jsonResponse`, jsonResponse);
+            console.log(`jsonResponseStatus`, jsonResponseStatus);
+          } catch (err) {
+            console.error("Error validating payment:", err);
+            toast.error(`Payment failed`);
+          }
+        },
+        // prefill: {
+        //   name: "",
+        //   email: "",
+        // },
+        // notes: {
+        //   address: "",
+        // },
+        theme: {
+          color: "43399cc",
+        },
+      };
+
+      var rzp1 = new Razorpay(options);
+
+      rzp1.on("payment.failed", (res) => {
+        alert(res.error.code);
+        alert(res.error.description);
+        alert(res.error.source);
+        alert(res.error.step);
+        alert(res.error.reason);
+        alert(res.error.metadata.order_id);
+        alert(res.error.metadata.payment_id);
+      });
+
+      rzp1.open();
+      e.preventDefault();
+    } catch (error) {
+      console.error("Error booking ticket:", error);
+    }
   };
 
   return (
@@ -33,17 +170,14 @@ const ViewShowDetails = () => {
             <h3 className="fw-semibold fs-4 mb-4 py-3">Movie details</h3>
 
             <figure className="movie-img">
-              <img src={movie} alt="" className="h-100 object-fit-cover" />
+              <img
+                src={movieData.photo}
+                alt="movie"
+                className="h-100 object-fit-cover"
+              />
             </figure>
 
-            <p className="my-4">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. A
-              ducimus aliquid quidem? Rem sint quod doloremque nesciunt
-              voluptatibus aperiam illum quaerat distinctio sapiente maiores.
-              Velit sint laborum illum, delectus et distinctio maxime autem
-              repellendus non! Dicta alias temporibus ipsam cupiditate sunt
-              nihil dolore ipsa. Nemo dolorem eos aperiam odit reprehenderit!
-            </p>
+            <p className="my-4">{movieData.description}</p>
           </div>
         </div>
         <div className="col-12 col-md-4 ">
@@ -55,24 +189,6 @@ const ViewShowDetails = () => {
             onSubmit={bookTicketHandler}
             className="p-3 border border-2 rounded"
           >
-            {/* Date selection */}
-            <div className="mb-3">
-              <h5 className="mb-3">
-                Select Date<span className="text-danger">*</span>
-              </h5>
-              {dates.map((date, index) => (
-                <button
-                  key={index}
-                  className={`btn btn-outline-primary me-2 mb-2 ${
-                    selectedDate === date ? "active" : ""
-                  }`}
-                  onClick={() => handleDateSelect(date)}
-                >
-                  {date}
-                </button>
-              ))}
-            </div>
-
             {/* Time selection */}
             <div className="mb-3">
               <h5 className="mb-3">
@@ -84,7 +200,13 @@ const ViewShowDetails = () => {
                   className={`btn btn-outline-primary me-2 mb-2 ${
                     selectedTime === time ? "active" : ""
                   }`}
-                  onClick={() => handleTimeSelect(time)}
+                  onClick={(e) => handleTimeSelect(time, e)} // Pass event here
+                  disabled={
+                    (time === "11:30 AM" && !movieData.firstShow) ||
+                    (time === "02:30 PM" && !movieData.matineeShow) ||
+                    (time === "5 PM" && !movieData.eveningShow) ||
+                    (time === "9 PM" && !movieData.nightShow)
+                  }
                 >
                   {time}
                 </button>
@@ -103,11 +225,20 @@ const ViewShowDetails = () => {
                 type="text"
                 placeholder="Number of tickets"
                 className="form-control"
+                name="ticketNumber"
+                value={movieData.ticketNumber}
+                onChange={handleInputChange}
               />
             </div>
 
-            <div className="mt-3 text-center">
-              <button className="btn btn-primary">Book ticket</button>
+            <div className="mt-3 text-start">
+              <button className="btn btn-primary">
+                {isLoading ? (
+                  <HashLoader size={25} color="#eee" />
+                ) : (
+                  `Book ticket`
+                )}
+              </button>
             </div>
           </form>
         </div>

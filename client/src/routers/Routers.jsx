@@ -25,7 +25,7 @@ const Routers = () => {
 
       {/* Admin routes */}
       <Route
-        path="/admin/home"
+        path="/admin/dashboard"
         element={
           <ProtectedRoutes allowedRoutes={["admin"]}>
             <AdminHome />

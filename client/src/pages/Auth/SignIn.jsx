@@ -38,7 +38,7 @@ const SignIn = () => {
         setRole(role);
 
         if (role === "admin") {
-          navigate("/admin/home");
+          navigate("/admin/dashboard");
           toast.success("Logged in");
         } else {
           navigate("/");

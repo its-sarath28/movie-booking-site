@@ -7,11 +7,7 @@ const ProtectedRoutes = ({ children, allowedRoutes }) => {
   const isAllowed = allowedRoutes.includes(role);
 
   const accessibleRoute =
-    isLoggedIn && isAllowed ? (
-      children
-    ) : (
-      <Navigate to={"/auth/sign-in"} replace={true} />
-    );
+    isLoggedIn && isAllowed ? children : <Navigate to={"/"} replace={true} />;
   return accessibleRoute;
 };
 

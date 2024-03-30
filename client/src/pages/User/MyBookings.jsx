@@ -26,7 +26,7 @@ const MyBookings = () => {
                     <td>@mdo</td>
                     <td>@mdo</td>
                     <td>
-                      <button className="btn btn-dark">Download</button>
+                      <button className="btn btn-dark">Download Ticket</button>
                     </td>
                   </tr>
                   <tr className="align-middle">
@@ -36,7 +36,7 @@ const MyBookings = () => {
                     <td>@mdo</td>
                     <td>@mdo</td>
                     <td>
-                      <button className="btn btn-dark">Download</button>
+                      <button className="btn btn-dark">Download Ticket</button>
                     </td>
                   </tr>
                   <tr className="align-middle">
@@ -46,7 +46,7 @@ const MyBookings = () => {
                     <td>@mdo</td>
                     <td>@mdo</td>
                     <td>
-                      <button className="btn btn-dark">Download</button>
+                      <button className="btn btn-dark">Download Ticket</button>
                     </td>
                   </tr>
                 </tbody>

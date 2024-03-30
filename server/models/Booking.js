@@ -12,9 +12,17 @@ const BookingSchema = new Schema(
       ref: "User",
       required: true,
     },
-    isPaid: {
-      type: Boolean,
-      default: true,
+    numberOfTickets: {
+      type: String,
+      required: true,
+    },
+    showTime: {
+      type: String,
+      required: true,
+    },
+    showDate: {
+      type: String,
+      required: true,
     },
   },
   { timestamps: true }
