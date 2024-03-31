@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import Razorpay from "razorpay";
+import nodemailer from "nodemailer";
 
 import Booking from "../models/Booking.js";
 import User from "../models/User.js";
@@ -45,6 +46,9 @@ export const validatePaymentController = async (req, res, next) => {
 
   console.log(req.body);
 
+  let bookingId;
+  let user;
+
   try {
     const sha = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET);
 
@@ -65,12 +69,53 @@ export const validatePaymentController = async (req, res, next) => {
       });
 
       await newBooking.save();
+      bookingId = newBooking._id;
+
+      await User.findByIdAndUpdate(req.userAuth, {
+        $push: { bookings: bookingId },
+      });
+
+      user = await User.findById(req.userAuth).select("email");
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.APP_PASSWORD,
+        },
+      });
+
+      const mailOptions = {
+        from: {
+          name: `BookMyMovie`,
+          address: process.env.EMAIL,
+        },
+        to: user.email,
+        subject: `Ticket booking confirmation`,
+        text: `Your booking with booking ID ${bookingId} has been confirmed. You can download the ticket from myBookings`,
+      };
+
+      const sendMail = async (transporter, mailOptions) => {
+        try {
+          await transporter.sendMail(mailOptions);
+          console.log(`Email send`);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      sendMail(transporter, mailOptions);
     }
 
     res.status(200).json({
       message: "Booking confirmed",
       orderId: razorpay_order_id,
       paymentId: razorpay_payment_id,
+      bookingId,
+      user,
     });
   } catch (err) {
     next(appError(err.message));

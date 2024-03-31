@@ -10,6 +10,7 @@ import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 import authRouter from "./routes/authRoute.js";
 import movieRouter from "./routes/movieRoute.js";
 import bookingRouter from "./routes/bookingRoute.js";
+import userRouter from "./routes/userRoute.js";
 
 dotenv.config();
 dbConnect();
@@ -25,6 +26,7 @@ app.use(cors({ origin: true }));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/movies", movieRouter);
 app.use("/api/v1/bookings", bookingRouter);
+app.use("/api/v1/users", userRouter);
 
 //Error handlers middleware
 app.use(globalErrorHandler);

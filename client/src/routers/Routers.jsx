@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+
 import Home from "../pages/User/Home";
 import SignIn from "../pages/Auth/SignIn";
 import SignUp from "../pages/Auth/SignUp";
@@ -10,6 +11,9 @@ import AdminHome from "../pages/Admin/AdminHome";
 import AddMovies from "../pages/Admin/AddMovies";
 import EditMovies from "../pages/Admin/EditMovies";
 import Logout from "../pages/Auth/Logout";
+
+import Ticket from "../Components/Ticket";
+
 import ProtectedRoutes from "./ProtectedRoutes";
 
 const Routers = () => {
@@ -22,6 +26,7 @@ const Routers = () => {
       <Route path="/auth/logout" element={<Logout />} />
       <Route path="/movies/:movieId" element={<ViewShowDetails />} />
       <Route path="/my-bookings" element={<MyBookings />} />
+      <Route path="/show-ticket/:bookingId" element={<Ticket />} />
 
       {/* Admin routes */}
       <Route

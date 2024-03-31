@@ -21,7 +21,7 @@ const Home = () => {
           setDates(res.data);
           // Set the selectedDate to the first date by default
           setSelectedDate(res.data[0]);
-          console.log("Available Dates:", res.data);
+          // console.log("Available Dates:", res.data);
         }
       };
 

@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from "react";
-import HashLoader from "react-spinners/HashLoader";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
+import HashLoader from "react-spinners/HashLoader";
 
 import { BASE_URL } from "../../config";
-import toast from "react-hot-toast";
 import { UserContext } from "../../context/userContext";
 
 const ViewShowDetails = () => {
@@ -17,7 +17,7 @@ const ViewShowDetails = () => {
     matineeShow: null,
     eveningShow: null,
     nightShow: null,
-    ticketNumber: 0,
+    ticketNumber: "",
   });
 
   const [selectedTime, setSelectedTime] = useState(null);
@@ -31,6 +31,8 @@ const ViewShowDetails = () => {
 
   const { movieId } = useParams();
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     try {
       setIsLoading(true);
@@ -41,7 +43,7 @@ const ViewShowDetails = () => {
           setMovieData(res.data);
           setTicketPrice(res.data.price);
           setIsLoading(false);
-          console.log(res.data);
+          // console.log(res.data);
         }
       };
 
@@ -93,7 +95,7 @@ const ViewShowDetails = () => {
       );
 
       const order = res.data;
-      console.log(order);
+      // console.log(order);
 
       var options = {
         key: "",
@@ -122,10 +124,12 @@ const ViewShowDetails = () => {
                 },
               }
             );
-            const jsonResponse = validateResponse.data;
-            const jsonResponseStatus = validateResponse.status;
-            console.log(`jsonResponse`, jsonResponse);
-            console.log(`jsonResponseStatus`, jsonResponseStatus);
+
+            if (validateResponse.status === 200) {
+              // toast.success(validateResponse.data.bookingId);
+              console.log(`validateResponse`, validateResponse.data);
+              navigate(`/show-ticket/${validateResponse.data.bookingId}`);
+            }
           } catch (err) {
             console.error("Error validating payment:", err);
             toast.error(`Payment failed`);
