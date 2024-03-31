@@ -9,11 +9,8 @@ const Navbar = () => {
   const token = isLoggedIn;
   return (
     <nav className="navbar navbar-expand-lg bg-white px-md-5 sticky-top">
-      <div className="container-fluid ">
-        <Link
-          className="navbar-brand fw-bolder m-0"
-          to={role === "admin" ? "/admin/dashboard" : "/"}
-        >
+      <div className="container-fluid px-0">
+        <Link className="navbar-brand fw-bolder m-0" to={"/"}>
           BookMyMovie
         </Link>
         <button
@@ -36,7 +33,7 @@ const Navbar = () => {
               <Link
                 className={
                   "nav-link fw-bolder" +
-                  ((status) => (status.isActive ? "active" : ""))
+                  ((status) => (status.isActive ? "active text-danger" : ""))
                 }
                 aria-current="page"
                 to="/"
@@ -55,6 +52,21 @@ const Navbar = () => {
                   to="/my-bookings"
                 >
                   My bookings
+                </Link>
+              </li>
+            )}
+
+            {role === "admin" && (
+              <li className="nav-item">
+                <Link
+                  className={
+                    "nav-link fw-bolder" +
+                    ((status) => (status.isActive ? "active" : ""))
+                  }
+                  aria-current="page"
+                  to="/admin/dashboard"
+                >
+                  Dashboard
                 </Link>
               </li>
             )}

@@ -1,6 +1,8 @@
 import Movies from "../models/Movies.js";
 import { appError } from "../utils/appError.js";
 
+import { validationResult } from "express-validator";
+
 export const getAllMoviesController = async (req, res, next) => {
   try {
     const allMovies = await Movies.find({});
@@ -41,12 +43,25 @@ export const addMovieController = async (req, res, next) => {
     nightShow,
   } = req.body;
 
-  console.log(req.body);
+  // console.log(req.body);
+
+  const errors = validationResult(req);
+
+  let formattedErrors = {};
+  if (!errors.isEmpty()) {
+    errors.array().forEach((error) => {
+      formattedErrors[error.path] = error.msg;
+    });
+    return res.status(500).json({ errors: formattedErrors });
+  }
+
   try {
     const existingMovie = await Movies.findOne({ name });
 
     if (existingMovie) {
-      return next(appError("Movie already exists"));
+      // return next(appError("Movie already exists"));
+      formattedErrors.name = "Movie already exists";
+      return res.status(500).json({ errors: formattedErrors });
     }
 
     await Movies.create({
@@ -83,6 +98,17 @@ export const editMovieController = async (req, res, next) => {
     eveningShow,
     nightShow,
   } = req.body;
+
+  const errors = validationResult(req);
+
+  let formattedErrors = {};
+  if (!errors.isEmpty()) {
+    errors.array().forEach((error) => {
+      formattedErrors[error.path] = error.msg;
+    });
+    return res.status(500).json({ errors: formattedErrors });
+  }
+
   try {
     const movieToUpdate = await Movies.findById(req.params.movieId);
 
@@ -145,10 +171,15 @@ export const fetchAvailableDatesController = async (req, res, next) => {
     // Remove duplicates from the array using Set
     const uniqueDates = [...new Set(arrayOfDates)];
 
-    // Sort unique dates in ascending order
-    uniqueDates.sort((a, b) => new Date(a) - new Date(b));
+    // Filter out dates older than today
+    const filteredDates = uniqueDates.filter(
+      (date) => new Date(date) >= new Date()
+    );
 
-    res.status(200).json(uniqueDates);
+    // Sort filtered dates in ascending order
+    filteredDates.sort((a, b) => new Date(a) - new Date(b));
+
+    res.status(200).json(filteredDates);
   } catch (err) {
     console.log(err);
     next(appError(err.message));

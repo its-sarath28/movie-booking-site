@@ -5,12 +5,20 @@ import User from "../models/User.js";
 import { appError } from "../utils/appError.js";
 import { generateToken } from "../utils/generateToken.js";
 
+import { validationResult } from "express-validator";
+
 export const signUpController = async (req, res, next) => {
   const { name, email, password, cnfPassword } = req.body;
-  // console.log(req.body);
 
-  if (!name || !email || !password || !cnfPassword) {
-    return next(appError("Fill in all fields"));
+  // Check if the fields are empty or not
+  const errors = validationResult(req);
+
+  let formattedErrors = {};
+  if (!errors.isEmpty()) {
+    errors.array().forEach((error) => {
+      formattedErrors[error.path] = error.msg;
+    });
+    return res.status(500).json({ errors: formattedErrors });
   }
 
   try {
@@ -19,7 +27,9 @@ export const signUpController = async (req, res, next) => {
     const userFound = await User.findOne({ email: newEmail });
 
     if (userFound) {
-      return next(appError("Email already exists"));
+      // return next(appError("Email already exists"));
+      formattedErrors.email = "Email already exists";
+      return res.status(500).json({ errors: formattedErrors });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -45,19 +55,34 @@ export const signUpController = async (req, res, next) => {
 export const signInController = async (req, res, next) => {
   const { email, password } = req.body;
 
+  // Check if the fields are empty or not
+  const errors = validationResult(req);
+
+  let formattedErrors = {};
+  if (!errors.isEmpty()) {
+    errors.array().forEach((error) => {
+      formattedErrors[error.path] = error.msg;
+    });
+    return res.status(500).json({ errors: formattedErrors });
+  }
+
   try {
     const newEmail = email.toLowerCase();
 
     const user = await User.findOne({ email: newEmail });
 
     if (!user) {
-      return next(appError("Invalid credentials"));
+      // return next(appError("Invalid credentials"));
+      formattedErrors.general = "Invalid credentials";
+      return res.status(500).json({ errors: formattedErrors });
     }
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatched) {
-      return next(appError("Invalid credentials"));
+      // return next(appError("Invalid credentials"));
+      formattedErrors.general = "Invalid credentials";
+      return res.status(500).json({ errors: formattedErrors });
     }
 
     res.status(200).json({

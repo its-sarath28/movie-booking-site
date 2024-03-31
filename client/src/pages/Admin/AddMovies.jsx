@@ -23,6 +23,15 @@ const AddMovies = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [previewURL, setPreviewURL] = useState(null);
 
+  const [errors, setErrors] = useState({
+    name: "",
+    date: "",
+    photo: "",
+    price: "",
+    description: "",
+    show: "",
+  });
+
   const navigate = useNavigate();
   const { isLoggedIn } = useContext(UserContext);
   const token = isLoggedIn;
@@ -69,65 +78,75 @@ const AddMovies = () => {
     e.preventDefault();
 
     console.log(formData);
-
-    if (!selectedFile) {
-      toast.error("Please select a photo");
-      return;
-    }
-
-    const formDataToUpload = new FormData();
-    formDataToUpload.append("file", selectedFile);
-    formDataToUpload.append(
-      "upload_preset",
-      import.meta.env.VITE_UPLOAD_PRESET
-    );
-
     try {
       setIsLoading(true);
-      const res = await axios.post(
-        `https://api.cloudinary.com/v1_1/${
-          import.meta.env.VITE_CLOUD_NAME
-        }/image/upload`,
-        formDataToUpload
-      );
 
-      if (res.status === 200) {
-        const imageURL = res.data.secure_url;
-        const updatedFormData = {
-          ...formData,
-          photo: imageURL,
-        };
+      let updatedFormData = { ...formData }; // Create a mutable copy of formData
 
-        const response = await axios.post(
-          `${BASE_URL}/movies/add-movie`,
-          updatedFormData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+      if (selectedFile) {
+        const formDataToUpload = new FormData();
+        formDataToUpload.append("file", selectedFile);
+        formDataToUpload.append(
+          "upload_preset",
+          import.meta.env.VITE_UPLOAD_PRESET
         );
 
-        if (response.status === 200) {
-          setIsLoading(false);
-          navigate("/admin/dashboard");
-          toast.success(`Movie added successfully`);
+        const res = await axios.post(
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUD_NAME
+          }/image/upload`,
+          formDataToUpload
+        );
+
+        if (res.status === 200) {
+          const imageURL = res.data.secure_url;
+          updatedFormData = { ...updatedFormData, photo: imageURL }; // Update the copy of formData
         }
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/movies/add-movie`,
+        updatedFormData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setIsLoading(false);
+        navigate("/admin/dashboard");
+        toast.success(`Movie added successfully`);
       }
     } catch (err) {
       setIsLoading(false);
       console.error(err);
-      toast.error("Something went wrong!");
+      if (err.response && err.response.data && err.response.data.errors) {
+        const { errors } = err.response.data;
+
+        setErrors({
+          name: errors.name || "",
+          date: errors.date || "",
+          photo: errors.photo || "",
+          price: errors.price || "",
+          description: errors.description || "",
+          show: errors.show || "",
+        });
+      }
     }
   };
 
   return (
-    <div className="container addMedicine d-flex flex-column align-itemscenter justify-content-center">
+    <div
+      className="container d-flex flex-column align-items-center justify-content-center"
+      style={{ minHeight: "80dvh" }}
+    >
       <div className="row d-flex justify-content-center">
-        <div className="col mt-3">
+        <div className="col">
           <form
             onSubmit={addMovieHandler}
-            className="shadow-lg px-4 py-2 text-center rounded"
+            className="shadow-lg p-4 text-center rounded"
           >
             <h3 className="mb-4">Add Movie</h3>
             <div className="row">
@@ -141,6 +160,9 @@ const AddMovies = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                   />
+                  {errors.name && (
+                    <p className="text-start text-danger">{errors.name}</p>
+                  )}
                 </div>
 
                 <div className="my-3">
@@ -154,6 +176,9 @@ const AddMovies = () => {
                     min={today}
                     max={maxDate}
                   />
+                  {errors.date && (
+                    <p className="text-start text-danger">{errors.date}</p>
+                  )}
                 </div>
               </div>
               <div className="col-md-6">
@@ -211,41 +236,49 @@ const AddMovies = () => {
                     </span>
                   </div>
                 </div>
+                {errors.show && (
+                  <p className="text-start text-danger">{errors.show}</p>
+                )}
               </div>
             </div>
 
-            <div className="mb-3">
+            <div className="my-3">
               <div className="row row-cols-sm-2 align-items-center">
-                <div className="col-md-6 d-flex align-items-center justify-content-start">
-                  {previewURL && (
-                    <figure className="avatar-img d-flex mt-2">
-                      <img
-                        src={previewURL}
-                        alt="avatar"
-                        className="w-100 object-fit-cover rounded-circle"
+                <div className="col-md-6  align-items-center justify-content-start">
+                  <div className="d-flex">
+                    {previewURL && (
+                      <figure className="avatar-img d-flex mt-2">
+                        <img
+                          src={previewURL}
+                          alt="avatar"
+                          className="w-100 object-fit-cover rounded-circle"
+                        />
+                      </figure>
+                    )}
+
+                    <div className="p-0 m-0">
+                      <input
+                        type="file"
+                        name="photo"
+                        id="customFile"
+                        accept=".jpg, .png, .jpeg"
+                        className="d-none absolute top-0 left-0 cursor-pointer"
+                        onChange={handleFileInputChange}
                       />
-                    </figure>
-                  )}
 
-                  <div className="p-0 m-0">
-                    <input
-                      type="file"
-                      name="photo"
-                      id="customFile"
-                      accept=".jpg, .png, .jpeg"
-                      className="d-none absolute top-0 left-0 cursor-pointer"
-                      onChange={handleFileInputChange}
-                    />
-
-                    <label
-                      htmlFor="customFile"
-                      className="p-2 overflow-hidden bg-secondary text-white font-semibold rounded"
-                    >
-                      Upload photo
-                    </label>
+                      <label
+                        htmlFor="customFile"
+                        className="p-2 overflow-hidden bg-secondary text-white font-semibold rounded"
+                      >
+                        Upload photo
+                      </label>
+                    </div>
                   </div>
+                  {errors.photo && (
+                    <p className="text-start text-danger">{errors.photo}</p>
+                  )}
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-6 mt-2 mt-sm-0">
                   <div className="">
                     <input
                       type="number"
@@ -255,6 +288,9 @@ const AddMovies = () => {
                       value={formData.price}
                       onChange={handleInputChange}
                     />
+                    {errors.price && (
+                      <p className="text-start text-danger">{errors.price}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -269,6 +305,9 @@ const AddMovies = () => {
                 value={formData.description}
                 onChange={handleInputChange}
               ></textarea>
+              {errors.description && (
+                <p className="text-start text-danger">{errors.description}</p>
+              )}
             </div>
 
             <div>

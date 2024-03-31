@@ -68,7 +68,7 @@ const Home = () => {
         {/* Sidebar for Date Selection */}
         <div className="col-md-3 bg-light rounded rounded-lg h-100">
           <div className="pb-4 pb-md-0">
-            <h2 className="text-center fs-4 py-3">Select Date</h2>
+            <h2 className="text-center fs-3 py-3 fw-semibold">Select Date</h2>
             <div className="date-buttons d-flex flex-row flex-md-column">
               {dates.map((date, index) => (
                 <button
@@ -99,7 +99,7 @@ const Home = () => {
                 {filterMoviesByDate().map(
                   ({ _id: id, name, photo, description, date }) => (
                     <div className="col" key={id}>
-                      <div className="card" style={{ width: "18rem" }}>
+                      <div className="card">
                         <img
                           src={photo}
                           className="card-img-top object-fit-cover"
@@ -107,7 +107,6 @@ const Home = () => {
                         />
                         <div className="card-body">
                           <h5 className="card-title fw-bold">{name}</h5>
-                          <p className="mb-0 text-muted fw-semibold">On</p>
                           <p className="card-text">
                             {truncateDescription(description, 100)}
                           </p>

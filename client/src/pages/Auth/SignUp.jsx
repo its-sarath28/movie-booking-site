@@ -14,6 +14,13 @@ const SignUp = () => {
     cnfPassword: "",
   });
 
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    cnfPassword: "",
+  });
+
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,7 +42,18 @@ const SignUp = () => {
       }
     } catch (err) {
       setIsLoading(false);
-      toast.error(err.response.data.message);
+      // toast.error(err.response.data.errors);
+      if (err.response && err.response.data && err.response.data.errors) {
+        const { errors } = err.response.data;
+
+        // If errors is an object
+        setErrors({
+          name: errors.name || "",
+          email: errors.email || "",
+          password: errors.password || "",
+          cnfPassword: errors.cnfPassword || "",
+        });
+      }
       console.error("Error:", err);
     }
   };
@@ -61,6 +79,7 @@ const SignUp = () => {
                   autoFocus
                   onChange={handleInputChange}
                 />
+                {errors.name && <p className="text-danger">{errors.name}</p>}
               </div>
 
               <div className="mb-3">
@@ -71,6 +90,7 @@ const SignUp = () => {
                   className="form-control"
                   onChange={handleInputChange}
                 />
+                {errors.email && <p className="text-danger">{errors.email}</p>}
               </div>
 
               <div className="mb-3">
@@ -81,6 +101,9 @@ const SignUp = () => {
                   className="form-control"
                   onChange={handleInputChange}
                 />
+                {errors.password && (
+                  <p className="text-danger">{errors.password}</p>
+                )}
               </div>
 
               <div className="mb-3">
@@ -91,6 +114,9 @@ const SignUp = () => {
                   className="form-control"
                   onChange={handleInputChange}
                 />
+                {errors.cnfPassword && (
+                  <p className="text-danger">{errors.cnfPassword}</p>
+                )}
               </div>
 
               <div className="text-center">

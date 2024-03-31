@@ -66,19 +66,35 @@ const ViewShowDetails = () => {
 
   const times = ["11:30 AM", "02:30 PM", "5 PM", "9 PM"];
 
+  const generateReceiptId = () => {
+    // Generate a random string
+    const randomString = Math.random().toString(36).substring(7);
+    // Get current timestamp
+    const timestamp = Date.now();
+    // Concatenate timestamp and random string
+    return `${timestamp}-${randomString}`;
+  };
+
   const bookTicketHandler = async (e) => {
     e.preventDefault();
 
-    if (isNaN(movieData.ticketNumber) || movieData.ticketNumber < 1) {
+    const ticketNumber = movieData.ticketNumber;
+    if (!selectedTime) {
+      toast.error(`Please select a show time`);
+      return;
+    }
+
+    if (isNaN(ticketNumber) || ticketNumber < 1) {
       toast.error(`Please enter a valid Number of tickets`);
       return;
     }
 
     const amount = ticketPrice * movieData.ticketNumber * 100;
     const currency = "INR";
-    const receiptId = "1234567890";
+    const receiptId = generateReceiptId();
 
     try {
+      setIsLoading(true);
       const res = await axios.post(
         `${BASE_URL}/bookings/book-ticket`,
         {
@@ -103,7 +119,7 @@ const ViewShowDetails = () => {
         currency,
         name: "BookMyMovie",
         description: "Test transaction",
-        image: "https://i.ibb..co/5Y3m33n/test.png",
+        // image: "https://i.ibb..co/5Y3m33n/test.png",
         order_id: order.id,
         handler: async (res) => {
           const body = {
@@ -127,6 +143,7 @@ const ViewShowDetails = () => {
 
             if (validateResponse.status === 200) {
               // toast.success(validateResponse.data.bookingId);
+              setIsLoading(false);
               console.log(`validateResponse`, validateResponse.data);
               navigate(`/show-ticket/${validateResponse.data.bookingId}`);
             }
@@ -177,11 +194,12 @@ const ViewShowDetails = () => {
               <img
                 src={movieData.photo}
                 alt="movie"
-                className="h-100 object-fit-cover"
+                className="h-100 object-fit-cover rounded"
               />
             </figure>
 
-            <p className="my-4">{movieData.description}</p>
+            <h3 className="fw-semibold fs-5 mt-5">About the movie</h3>
+            <p className="mb-4">{movieData.description}</p>
           </div>
         </div>
         <div className="col-12 col-md-4 ">
@@ -233,6 +251,11 @@ const ViewShowDetails = () => {
                 value={movieData.ticketNumber}
                 onChange={handleInputChange}
               />
+              {/* {errors.ticketNumber && movieData.ticketNumber < 1 && (
+                <p className="text-danger">
+                  Number of tickets must be a valid number greater than 0.
+                </p>
+              )} */}
             </div>
 
             <div className="mt-3 text-start">

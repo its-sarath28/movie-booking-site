@@ -13,6 +13,12 @@ const SignIn = () => {
     password: "",
   });
 
+  const [errors, setErrors] = useState({
+    name: "",
+    password: "",
+    general: "",
+  });
+
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +54,17 @@ const SignIn = () => {
     } catch (err) {
       setIsLoading(false);
       console.log(err);
-      toast.error(err.response.data.message);
+      // toast.error(err.response.data.message);
+      if (err.response && err.response.data && err.response.data.errors) {
+        const { errors } = err.response.data;
+
+        // If errors is an object
+        setErrors({
+          email: errors.email || "",
+          password: errors.password || "",
+          general: errors.general || "",
+        });
+      }
     }
   };
 
@@ -64,6 +80,10 @@ const SignIn = () => {
               <h3 className="mb-0 fw-bolder">Sign in</h3>
               <p>Fill in your credentials to signin.</p>
 
+              {errors.general && (
+                <p className="text-danger text-center">{errors.general}</p>
+              )}
+
               <div className="mb-3">
                 <input
                   type="email"
@@ -73,6 +93,7 @@ const SignIn = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                 />
+                {errors.email && <p className="text-danger">{errors.email}</p>}
               </div>
 
               <div className="mb-3">
@@ -84,6 +105,9 @@ const SignIn = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                 />
+                {errors.password && (
+                  <p className="text-danger">{errors.password}</p>
+                )}
               </div>
 
               <div className="text-center">

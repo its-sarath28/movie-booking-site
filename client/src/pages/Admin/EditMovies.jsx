@@ -25,6 +25,13 @@ const EditMovies = () => {
   const [previewURL, setPreviewURL] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
 
+  const [errors, setErrors] = useState({
+    name: "",
+    price: "",
+    description: "",
+    show: "",
+  });
+
   const { isLoggedIn } = useContext(UserContext);
 
   const navigate = useNavigate();
@@ -123,20 +130,29 @@ const EditMovies = () => {
 
         if (response.status === 200) {
           setIsLoading(false);
-          navigate("/admin/home");
+          navigate("/admin/dashboard");
           toast.success(`Movie updated successfully`);
         }
       } catch (err) {
         setIsLoading(false);
         console.error(err);
-        toast.error("Something went wrong!");
+        if (err.response && err.response.data && err.response.data.errors) {
+          const { errors } = err.response.data;
+
+          setErrors({
+            name: errors.name || "",
+            price: errors.price || "",
+            description: errors.description || "",
+            show: errors.show || "",
+          });
+        }
       }
     } else {
       // If a new image is selected, proceed with uploading the image and updating movie details
-      if (!selectedFile) {
-        toast.error(`Please select an image`);
-        return;
-      }
+      // if (!selectedFile) {
+      //   toast.error(`Please select an image`);
+      //   return;
+      // }
 
       const formDataToUpload = new FormData();
       formDataToUpload.append("file", selectedFile);
@@ -173,22 +189,36 @@ const EditMovies = () => {
 
           if (response.status === 200) {
             setIsLoading(false);
-            navigate("/admin/home");
+            navigate("/admin/dashboard");
             toast.success(`Movie updated successfully`);
           }
         }
       } catch (err) {
         setIsLoading(false);
         console.error(err);
-        toast.error("Something went wrong!");
+        // toast.error("Something went wrong!");
+
+        if (err.response && err.response.data && err.response.data.errors) {
+          const { errors } = err.response.data;
+
+          setErrors({
+            name: errors.name || "",
+            price: errors.price || "",
+            description: errors.description || "",
+            show: errors.show || "",
+          });
+        }
       }
     }
   };
 
   return (
-    <div className="container addMedicine d-flex flex-column align-itemscenter justify-content-center">
+    <div
+      className="container d-flex flex-column align-itemscenter justify-content-center"
+      style={{ minHeight: "80dvh" }}
+    >
       <div className="row d-flex justify-content-center">
-        <div className="col mt-3">
+        <div className="col">
           {isLoadingForm && (
             <div className="d-flex align-items-center justify-content-center">
               <HashLoader size={35} color="#333" />
@@ -198,7 +228,7 @@ const EditMovies = () => {
           {!isLoadingForm && (
             <form
               onSubmit={editMovieHandler}
-              className="shadow-lg px-4 py-2 text-center rounded"
+              className="shadow-lg p-4 text-center rounded"
             >
               <h3 className="mb-4">Edit Movie</h3>
               <div className="row">
@@ -212,6 +242,9 @@ const EditMovies = () => {
                       value={formData.name}
                       onChange={handleInputChange}
                     />
+                    {errors.name && (
+                      <p className="text-start text-danger">{errors.name}</p>
+                    )}
                   </div>
 
                   <div className="my-3">
@@ -285,6 +318,9 @@ const EditMovies = () => {
                       </span>
                     </div>
                   </div>
+                  {errors.show && (
+                    <p className="text-start text-danger">{errors.show}</p>
+                  )}
                 </div>
               </div>
 
@@ -339,6 +375,9 @@ const EditMovies = () => {
                         value={formData.price}
                         onChange={handleInputChange}
                       />
+                      {errors.price && (
+                        <p className="text-start text-danger">{errors.price}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -353,6 +392,9 @@ const EditMovies = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                 ></textarea>
+                {errors.description && (
+                  <p className="text-start text-danger">{errors.description}</p>
+                )}
               </div>
 
               <div>
