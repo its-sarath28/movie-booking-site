@@ -56,13 +56,13 @@ export const addMovieController = async (req, res, next) => {
   }
 
   try {
-    const existingMovie = await Movies.findOne({ name });
+    // const existingMovie = await Movies.findOne({ name });
 
-    if (existingMovie) {
-      // return next(appError("Movie already exists"));
-      formattedErrors.name = "Movie already exists";
-      return res.status(500).json({ errors: formattedErrors });
-    }
+    // if (existingMovie) {
+    //   // return next(appError("Movie already exists"));
+    //   formattedErrors.name = "Movie already exists";
+    //   return res.status(500).json({ errors: formattedErrors });
+    // }
 
     await Movies.create({
       name,
