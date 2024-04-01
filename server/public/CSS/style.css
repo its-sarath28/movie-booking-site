@@ -1,0 +1,30 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.height {
+  height: 80vh;
+}
+
+.ticketDetails .col-md-8 {
+  text-transform: uppercase;
+}
+
+.ticketDetails .movieName {
+  font-size: 1.8rem;
+}
+
+.ticketDetails .heading2 {
+  font-size: 1rem;
+}
+
+.ticketDetails .subHeading {
+  font-size: 0.9rem;
+}
+
+.ticketDetails .qr {
+  width: 100px;
+  height: 100px;
+}

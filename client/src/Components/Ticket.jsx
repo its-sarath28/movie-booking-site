@@ -47,8 +47,8 @@ const Ticket = () => {
 
   return (
     <div className="container">
-      <div className="row height d-flex flex-column align-items-center justify-content-center">
-        <div className="col-md-6 rounded">
+      <div className="row height d-flex flex-column align-items-center justify-content-center ">
+        <div className="col-md-6 rounded shadow px-0">
           {ticketData.movie && (
             <>
               <div className="bg-danger ps-4 py-3 rounded-top">
@@ -100,7 +100,7 @@ const Ticket = () => {
                     </div>
                   </div>
 
-                  <div className="col-md-4 d-flex align-items-center justify-content-center">
+                  <div className="col-md-4 d-flex align-items-center justify-content-center pb-3 pb-md-0">
                     <QRCodeSVG
                       value={`
                       Movie name: ${ticketData.movie.name}

@@ -8,7 +8,7 @@ const Navbar = () => {
 
   const token = isLoggedIn;
   return (
-    <nav className="navbar navbar-expand-lg bg-white px-md-5 sticky-top">
+    <nav className="navbar navbar-expand-lg bg-white px-md-5 px-3 sticky-top">
       <div className="container-fluid px-0">
         <Link className="navbar-brand fw-bolder m-0" to={"/"}>
           BookMyMovie

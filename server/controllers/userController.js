@@ -1,5 +1,13 @@
+import { promisify } from "util";
+import fs from "fs";
+import puppeteer from "puppeteer";
+import ejs from "ejs";
+import QRCode from "qrcode";
+
 import Booking from "../models/Booking.js";
 import { appError } from "../utils/appError.js";
+
+const readFileAsync = promisify(fs.readFile);
 
 export const getTicketDetails = async (req, res, next) => {
   const bookingId = req.params.bookingId;
@@ -46,5 +54,40 @@ export const getMyBookingsController = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     next(appError(err));
+  }
+};
+
+export const generateTicketPDFController = async (req, res) => {
+  try {
+    const bookingId = req.params.bookingId;
+
+    const booking = await Booking.findById(bookingId).populate("movie", "name");
+
+    const template = await readFileAsync("../server/views/Ticket.ejs", "utf8");
+
+    // Generate QR code
+    const QR_DATA = `Movie name: ${booking.movie.name} \n Show Date: ${booking.showDate} \n Show Time: ${booking.showTime} \n Number of Tickets: ${booking.numberOfTickets} \n Booking Id: ${booking._id}`;
+
+    const qrCode = await QRCode.toDataURL(QR_DATA, { width: 10 });
+
+    const html = ejs.render(template, { booking, qrCode });
+
+    const browser = await puppeteer.launch({ headless: "new" });
+
+    const page = await browser.newPage();
+
+    await page.setContent(html);
+
+    const pdfBuffer = await page.pdf();
+
+    await browser.close();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="ticket.pdf"`);
+
+    res.status(200).send(pdfBuffer);
+  } catch (err) {
+    console.error("Error while creating pdf:", err);
+    res.status(500).json("Internal Server Error");
   }
 };

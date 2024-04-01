@@ -34,6 +34,12 @@ const ViewShowDetails = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!token) {
+      navigate("/auth/sign-in");
+    }
+  }, [token, navigate]);
+
+  useEffect(() => {
     try {
       setIsLoading(true);
       const getSingleMovieData = async () => {

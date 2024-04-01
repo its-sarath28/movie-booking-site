@@ -2,6 +2,10 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import path from "path";
+
+import { fileURLToPath } from "url"; // Import fileURLToPath
+import { dirname } from "path"; // Import dirname
 
 import { dbConnect } from "./config/dbConnect.js";
 
@@ -15,9 +19,17 @@ import userRouter from "./routes/userRoute.js";
 dotenv.config();
 dbConnect();
 
+const __filename = fileURLToPath(import.meta.url); // Get the current file path
+const __dirname = dirname(__filename); // Get the directory name
+
 const app = express();
 
+// view engine setup
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
+
 //Middleware
+app.use(express.static(path.join(__dirname, "/server/public")));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
