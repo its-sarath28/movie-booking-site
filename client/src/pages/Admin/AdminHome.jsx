@@ -49,6 +49,7 @@ const AdminHome = () => {
     try {
       setIsLoading(true);
       await axios.delete(`${BASE_URL}/movies/delete-movie/${selectedMovieId}`, {
+        withCredentials: true,
         headers: {
           Authorization: `Bearer ${token}`,
         },

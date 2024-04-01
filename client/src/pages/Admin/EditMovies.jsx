@@ -55,6 +55,7 @@ const EditMovies = () => {
         setIsLoadingForm(true);
         const getMovie = async () => {
           const res = await axios.get(`${BASE_URL}/movies/${movieId}`, {
+            withCredentials: true,
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -122,6 +123,7 @@ const EditMovies = () => {
           `${BASE_URL}/movies/edit-movie/${movieId}`,
           formData, // Use formData directly without modifying it
           {
+            withCredentials: true,
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -181,6 +183,7 @@ const EditMovies = () => {
             `${BASE_URL}/movies/edit-movie/${movieId}`,
             updatedFormData,
             {
+              withCredentials: true,
               headers: {
                 Authorization: `Bearer ${token}`,
               },

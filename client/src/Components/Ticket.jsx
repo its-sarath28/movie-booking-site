@@ -25,6 +25,7 @@ const Ticket = () => {
         const res = await axios.get(
           `${BASE_URL}/users/ticket-details/${bookingId}`,
           {
+            withCredentials: true,
             headers: {
               Authorization: `Bearer ${token}`,
             },

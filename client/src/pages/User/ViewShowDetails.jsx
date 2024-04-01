@@ -109,6 +109,7 @@ const ViewShowDetails = () => {
           receipt: receiptId,
         },
         {
+          withCredentials: true,
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -140,6 +141,7 @@ const ViewShowDetails = () => {
               `${BASE_URL}/bookings/validate-payment`,
               body,
               {
+                withCredentials: true,
                 headers: {
                   "Content-Type": "application/json",
                   Authorization: `Bearer ${token}`,

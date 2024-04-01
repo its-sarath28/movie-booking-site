@@ -24,6 +24,7 @@ const MyBookings = () => {
       const getMyBookings = async () => {
         try {
           const res = await axios.get(`${BASE_URL}/users/my-bookings`, {
+            withCredentials: true,
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -52,6 +53,7 @@ const MyBookings = () => {
       const res = await axios.get(
         `${BASE_URL}/users/generate-ticket/${bookingId}`,
         {
+          withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
           },

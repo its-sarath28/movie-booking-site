@@ -108,6 +108,7 @@ const AddMovies = () => {
         `${BASE_URL}/movies/add-movie`,
         updatedFormData,
         {
+          withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
           },
