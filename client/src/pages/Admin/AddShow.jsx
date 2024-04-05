@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HashLoader from "react-spinners/HashLoader";
 import axios from "axios";
@@ -7,28 +7,24 @@ import toast from "react-hot-toast";
 import { UserContext } from "../../context/userContext";
 import { BASE_URL } from "../../config";
 
-const AddMovies = () => {
-  const [formData, setFormData] = useState({
-    name: "",
+const AddShow = () => {
+  const [showData, setShowData] = useState({
+    movie: "",
     date: "",
-    photo: "",
     price: "",
-    description: "",
     firstShow: false,
     matineeShow: false,
     eveningShow: false,
     nightShow: false,
   });
-  const [selectedFile, setSelectedFile] = useState(null);
+
   const [isLoading, setIsLoading] = useState(false);
-  const [previewURL, setPreviewURL] = useState(null);
+  const [movieNames, setMovieNames] = useState([]);
 
   const [errors, setErrors] = useState({
-    name: "",
+    movie: "",
     date: "",
-    photo: "",
-    price: "",
-    description: "",
+    // price: "",
     show: "",
   });
 
@@ -41,72 +37,73 @@ const AddMovies = () => {
   sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
   const maxDate = sevenDaysFromNow.toISOString().split("T")[0];
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    if (!token) {
+      navigate("/auth/sign-in");
+    } else {
+      const getAvailableMovieNames = async () => {
+        try {
+          setIsLoading(true);
+          const res = await axios.get(`${BASE_URL}/movies/names`, {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-  const handleFileInputChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-    setPreviewURL(URL.createObjectURL(file));
+          if (res.status === 200) {
+            console.log(res.data, "Movie names");
+            setMovieNames(res.data);
+            setIsLoading(false);
+          }
+        } catch (err) {
+          setIsLoading(false);
+          console.log(`Error getting movie names: ${err}`);
+        }
+      };
+
+      getAvailableMovieNames();
+    }
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setShowData({ ...showData, [name]: value });
   };
 
   const handleTimeCheckboxChange = (time) => {
-    let updatedFormData = { ...formData };
+    let updatedShowData = { ...showData };
 
     switch (time) {
       case "11:30 AM":
-        updatedFormData.firstShow = !updatedFormData.firstShow;
+        updatedShowData.firstShow = !updatedShowData.firstShow;
         break;
       case "2:30 PM":
-        updatedFormData.matineeShow = !updatedFormData.matineeShow;
+        updatedShowData.matineeShow = !updatedShowData.matineeShow;
         break;
       case "5 PM":
-        updatedFormData.eveningShow = !updatedFormData.eveningShow;
+        updatedShowData.eveningShow = !updatedShowData.eveningShow;
         break;
       case "9 PM":
-        updatedFormData.nightShow = !updatedFormData.nightShow;
+        updatedShowData.nightShow = !updatedShowData.nightShow;
         break;
       default:
         break;
     }
 
-    setFormData(updatedFormData);
+    setShowData(updatedShowData);
   };
 
   const addMovieHandler = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
+    console.log(showData);
     try {
       setIsLoading(true);
 
-      let updatedFormData = { ...formData }; // Create a mutable copy of formData
-
-      if (selectedFile) {
-        const formDataToUpload = new FormData();
-        formDataToUpload.append("file", selectedFile);
-        formDataToUpload.append(
-          "upload_preset",
-          import.meta.env.VITE_UPLOAD_PRESET
-        );
-
-        const res = await axios.post(
-          `https://api.cloudinary.com/v1_1/${
-            import.meta.env.VITE_CLOUD_NAME
-          }/image/upload`,
-          formDataToUpload
-        );
-
-        if (res.status === 200) {
-          const imageURL = res.data.secure_url;
-          updatedFormData = { ...updatedFormData, photo: imageURL }; // Update the copy of formData
-        }
-      }
-
       const response = await axios.post(
-        `${BASE_URL}/movies/add-movie`,
-        updatedFormData,
+        `${BASE_URL}/shows/add-show`,
+        showData,
         {
           withCredentials: true,
           headers: {
@@ -126,12 +123,11 @@ const AddMovies = () => {
       if (err.response && err.response.data && err.response.data.errors) {
         const { errors } = err.response.data;
 
+        console.log(errors);
         setErrors({
-          name: errors.name || "",
+          movie: errors.movie || "",
           date: errors.date || "",
-          photo: errors.photo || "",
-          price: errors.price || "",
-          description: errors.description || "",
+          // price: errors.price || "",
           show: errors.show || "",
         });
       }
@@ -153,16 +149,24 @@ const AddMovies = () => {
             <div className="row">
               <div className="col-md-6">
                 <div>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Movie name"
-                    className="form-control"
-                    value={formData.name}
+                  <select
+                    className="form-select"
+                    aria-label="Default select example"
+                    name="movie"
+                    value={showData.movie}
                     onChange={handleInputChange}
-                  />
-                  {errors.name && (
-                    <p className="text-start text-danger">{errors.name}</p>
+                  >
+                    <option value="" defaultValue={"select one"} hidden>
+                      Select Movie
+                    </option>
+                    {movieNames?.map((movie) => (
+                      <option key={movie._id} value={movie._id}>
+                        {movie.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.movie && (
+                    <p className="text-start text-danger">{errors.movie}</p>
                   )}
                 </div>
 
@@ -172,7 +176,7 @@ const AddMovies = () => {
                     name="date"
                     placeholder="Date"
                     className="form-control"
-                    value={formData.date}
+                    value={showData.date}
                     onChange={handleInputChange}
                     min={today}
                     max={maxDate}
@@ -191,7 +195,7 @@ const AddMovies = () => {
                         <input
                           type="checkbox"
                           onChange={() => handleTimeCheckboxChange("11:30 AM")}
-                          checked={formData.firstShow === true}
+                          checked={showData.firstShow === true}
                         />
                         <span className="slider round"></span>
                       </label>
@@ -204,7 +208,7 @@ const AddMovies = () => {
                         <input
                           type="checkbox"
                           onChange={() => handleTimeCheckboxChange("2:30 PM")}
-                          checked={formData.matineeShow === true}
+                          checked={showData.matineeShow === true}
                         />
                         <span className="slider round"></span>
                       </label>
@@ -217,7 +221,7 @@ const AddMovies = () => {
                         <input
                           type="checkbox"
                           onChange={() => handleTimeCheckboxChange("5 PM")}
-                          checked={formData.eveningShow === true}
+                          checked={showData.eveningShow === true}
                         />
                         <span className="slider round"></span>
                       </label>
@@ -230,7 +234,7 @@ const AddMovies = () => {
                         <input
                           type="checkbox"
                           onChange={() => handleTimeCheckboxChange("9 PM")}
-                          checked={formData.nightShow === true}
+                          checked={showData.nightShow === true}
                         />
                         <span className="slider round"></span>
                       </label>
@@ -243,81 +247,23 @@ const AddMovies = () => {
               </div>
             </div>
 
-            <div className="my-3">
-              <div className="row row-cols-sm-2 align-items-center">
-                <div className="col-md-6  align-items-center justify-content-start">
-                  <div className="d-flex">
-                    {previewURL && (
-                      <figure className="avatar-img d-flex mt-2">
-                        <img
-                          src={previewURL}
-                          alt="avatar"
-                          className="w-100 object-fit-cover rounded-circle"
-                        />
-                      </figure>
-                    )}
-
-                    <div className="p-0 m-0">
-                      <input
-                        type="file"
-                        name="photo"
-                        id="customFile"
-                        accept=".jpg, .png, .jpeg"
-                        className="d-none absolute top-0 left-0 cursor-pointer"
-                        onChange={handleFileInputChange}
-                      />
-
-                      <label
-                        htmlFor="customFile"
-                        className="p-2 overflow-hidden bg-secondary text-white font-semibold rounded"
-                      >
-                        Upload photo
-                      </label>
-                    </div>
-                  </div>
-                  {errors.photo && (
-                    <p className="text-start text-danger">{errors.photo}</p>
-                  )}
-                </div>
-                <div className="col-md-6 mt-2 mt-sm-0">
-                  <div className="">
-                    <input
-                      type="number"
-                      name="price"
-                      placeholder="Ticket price"
-                      className="form-control"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                    />
-                    {errors.price && (
-                      <p className="text-start text-danger">{errors.price}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <textarea
-                name="description"
-                rows="5"
-                placeholder="Description"
-                className="form-control overflow-auto"
-                value={formData.description}
+            {/* <div className="my-3">
+              <input
+                type="number"
+                name="price"
+                placeholder="Ticket price"
+                className="form-control"
+                value={showData.price}
                 onChange={handleInputChange}
-              ></textarea>
-              {errors.description && (
-                <p className="text-start text-danger">{errors.description}</p>
+              />
+              {errors.price && (
+                <p className="text-start text-danger">{errors.price}</p>
               )}
-            </div>
+            </div> */}
 
             <div>
               <button type="submit" className="btn btn-primary">
-                {isLoading ? (
-                  <HashLoader size={25} color="#eee" />
-                ) : (
-                  `Add Movie`
-                )}
+                {isLoading ? <HashLoader size={25} color="#eee" /> : `Add Show`}
               </button>
             </div>
           </form>
@@ -327,4 +273,4 @@ const AddMovies = () => {
   );
 };
 
-export default AddMovies;
+export default AddShow;

@@ -1,163 +1,103 @@
 import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { UserContext } from "../../context/userContext";
 import { BASE_URL } from "../../config";
 
-import DeleteConfirmationModal from "./DeleteConfirmModal";
+import ViewShows from "./ViewShows";
+import ViewMovies from "./ViewMovies";
 
 const AdminHome = () => {
   const [movies, setMovies] = useState([]);
+  const [shows, setShows] = useState([]);
+  const [tab, setTab] = useState("shows");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedMovieId, setSelectedMovieId] = useState(null);
-  const { isLoggedIn, role } = useContext(UserContext);
 
   const navigate = useNavigate();
+
+  const { isLoggedIn } = useContext(UserContext);
   const token = isLoggedIn;
+
   useEffect(() => {
     if (!token) {
       navigate("/auth/sign-in");
-    } else {
+    }
+  }, [token, navigate]);
+
+  useEffect(() => {
+    const getAllMovies = async () => {
+      try {
+        setIsLoading(false);
+        const res = await axios.get(`${BASE_URL}/movies`, {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.status === 200) {
+          setMovies(res.data);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        setIsLoading(false);
+        console.log(`Err getting movies: ${err}`);
+      }
+    };
+
+    getAllMovies();
+  }, []);
+
+  useEffect(() => {
+    const getAllShows = async () => {
       try {
         setIsLoading(true);
-        const getMovies = async () => {
-          const res = await axios.get(`${BASE_URL}/movies`);
+        const res = await axios.get(`${BASE_URL}/shows`);
 
-          if (res.status === 200) {
-            setMovies(res.data);
-            console.log(res.data);
-            setIsLoading(false);
-          }
-        };
-
-        getMovies();
+        if (res.status === 200) {
+          setShows(res.data);
+          setIsLoading(false);
+        }
       } catch (err) {
-        console.log("Error: ", err);
         setIsLoading(false);
-        toast.error(`An error occurred while fetching movies.`);
+        console.log(`Err getting shows: ${err}`);
       }
-    }
-  }, [token, role, navigate]);
+    };
 
-  const handleDeleteClick = (medicineId) => {
-    setSelectedMovieId(medicineId);
-  };
-
-  const deleteMovieHandler = async () => {
-    try {
-      setIsLoading(true);
-      await axios.delete(`${BASE_URL}/movies/delete-movie/${selectedMovieId}`, {
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setIsLoading(false);
-
-      setSelectedMovieId(null);
-      navigate(0);
-      toast.success(`Movie deleted successfully!`);
-    } catch (err) {
-      console.log(err);
-      toast.error(`Error while deleting movie`);
-    }
-  };
+    getAllShows();
+  }, []);
 
   return (
-    <>
-      <div className="container py-5">
-        <div className="row mb-5">
-          <div className="col d-flex justify-content-center justify-content-md-end align-items-center">
-            <Link
-              to={"/add-movie"}
-              className="btn btn-primary d-flex align-items-center"
+    <div className="container py-5">
+      <div className="row mb-3">
+        <div className="col">
+          <div className="d-flex gap-4 align-items-center justify-content-center">
+            <button
+              onClick={() => setTab("shows")}
+              className={`btn ${
+                tab === "shows" ? "btn-primary" : "btn-outline-primary"
+              }`}
             >
-              Add Movie
-            </Link>
+              Shows
+            </button>
+            <button
+              onClick={() => setTab("movies")}
+              className={`btn ${
+                tab === "movies" ? "btn-primary" : "btn-outline-primary"
+              }`}
+            >
+              Movies
+            </button>
           </div>
-        </div>
-
-        <div className="row row-cols-1 row-cols-md-3 g-4">
-          {movies?.map(
-            ({
-              _id: id,
-              name,
-              date,
-              firstShow,
-              matineeShow,
-              eveningShow,
-              nightShow,
-            }) => (
-              <div className="col" key={id}>
-                <div className="card">
-                  <div className="card-body">
-                    <h5 className="card-title">{name}</h5>
-                    <p>
-                      On <span className="fw-bold">{date}</span>
-                    </p>
-                    <p className="card-text">
-                      11: 30 AM (
-                      {firstShow === true ? (
-                        <span className="text-success">Running</span>
-                      ) : (
-                        <span className="text-danger">Disbled</span>
-                      )}
-                      )
-                    </p>
-                    <p className="card-text">
-                      2: 30 PM (
-                      {matineeShow === true ? (
-                        <span className="text-success">Running</span>
-                      ) : (
-                        <span className="text-danger">Disbled</span>
-                      )}
-                      )
-                    </p>
-                    <p className="card-text">
-                      5 PM (
-                      {eveningShow === true ? (
-                        <span className="text-success">Running</span>
-                      ) : (
-                        <span className="text-danger">Disbled</span>
-                      )}
-                      )
-                    </p>
-                    <p className="card-text">
-                      9 PM (
-                      {nightShow === true ? (
-                        <span className="text-success">Running</span>
-                      ) : (
-                        <span className="text-danger">Disbled</span>
-                      )}
-                      )
-                    </p>
-                  </div>
-
-                  <div className="d-flex gap-2 ps-3 pb-3">
-                    <Link to={`/edit-movie/${id}`} className="btn btn-primary">
-                      Edit
-                    </Link>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDeleteClick(id)}
-                      data-bs-toggle="modal"
-                      data-bs-target="#deleteModal"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )
-          )}
         </div>
       </div>
 
-      <DeleteConfirmationModal onConfirm={deleteMovieHandler} />
-    </>
+      <div className="row">
+        {tab === "shows" && <ViewShows shows={shows} />}
+        {tab === "movies" && <ViewMovies movies={movies} />}
+      </div>
+    </div>
   );
 };
 

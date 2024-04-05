@@ -29,7 +29,6 @@ export const bookTicketController = async (req, res, next) => {
     res.status(200).json(order);
   } catch (err) {
     next(appError(err.message));
-    console.log(`Error while booking: ${err}`);
   }
 };
 
@@ -39,7 +38,7 @@ export const validatePaymentController = async (req, res, next) => {
     razorpay_payment_id,
     razorpay_signature,
     movieId,
-    numberOfTickets,
+    numOfTickets,
     showTime,
     showDate,
   } = req.body;
@@ -63,7 +62,7 @@ export const validatePaymentController = async (req, res, next) => {
       const newBooking = await Booking.create({
         movie: movieId,
         user: req.userAuth,
-        numberOfTickets,
+        numOfTickets,
         showTime,
         showDate,
       });

@@ -3,34 +3,17 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import HashLoader from "react-spinners/HashLoader";
+import { Navigation, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+
+import "swiper/swiper-bundle.css";
 
 import { BASE_URL } from "../../config";
+import Hero from "../../Components/Hero";
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
-  const [dates, setDates] = useState([]);
-  const [selectedDate, setSelectedDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    try {
-      const getAvailableDates = async () => {
-        const res = await axios.get(`${BASE_URL}/movies/available-dates`);
-
-        if (res.status === 200) {
-          setDates(res.data);
-          // Set the selectedDate to the first date by default
-          setSelectedDate(res.data[0]);
-          // console.log("Available Dates:", res.data);
-        }
-      };
-
-      getAvailableDates();
-    } catch (err) {
-      console.log("Error: ", err);
-      toast.error(`An error occurred while fetching dates.`);
-    }
-  }, []);
 
   useEffect(() => {
     try {
@@ -40,6 +23,7 @@ const Home = () => {
 
         if (res.status === 200) {
           setMovies(res.data);
+          console.log(res.data);
           setIsLoading(false);
         }
       };
@@ -51,84 +35,95 @@ const Home = () => {
     }
   }, []);
 
-  const truncateDescription = (description, maxLength) => {
-    if (description.length <= maxLength) {
-      return description;
-    }
-    return description.slice(0, maxLength) + "...";
-  };
-
-  const filterMoviesByDate = () => {
-    return movies.filter((movie) => movie.date === selectedDate);
-  };
-
   return (
-    <div className="container-fluid px-2">
-      <div className="row mx-0">
-        {/* Sidebar for Date Selection */}
-        <div className="col-md-3 bg-light rounded rounded-lg h-100">
-          <div className="pb-4 pb-md-0">
-            <h2 className="text-center fs-3 py-3 fw-semibold">Select Date</h2>
-            <div className="date-buttons d-flex flex-row flex-md-column">
-              {dates.map((date, index) => (
-                <button
-                  key={index}
-                  className={`btn btn-outline-primary mx-md-auto mb-md-3 me-3 ${
-                    selectedDate === date ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedDate(date)}
-                >
-                  {date}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+    <>
+      {/* <Hero /> */}
+      <div className="container-fluid px-2">
+        <div className="row mx-0 mt-5">
+          {/* Movies Section */}
+          <div className="col">
+            <div className="container home">
+              {isLoading && (
+                <div className="d-flex align-items-center justify-content-center">
+                  <HashLoader size={35} color="#333" />
+                </div>
+              )}
 
-        {/* Movies Section */}
-        <div className="col-md-9">
-          <div className="container home">
-            {isLoading && (
-              <div className="d-flex align-items-center justify-content-center">
-                <HashLoader size={35} color="#333" />
-              </div>
-            )}
-            {/* Movies List */}
-            {!isLoading && (
-              <div className="row row-cols-1 row-cols-md-3 gx-4">
-                {filterMoviesByDate().map(
-                  ({ _id: id, name, photo, description, date }) => (
-                    <div className="col" key={id}>
-                      <div className="card">
-                        <img
-                          src={photo}
-                          className="card-img-top object-fit-cover"
-                          alt="movie"
-                        />
-                        <div className="card-body">
-                          <h5 className="card-title fw-bold">{name}</h5>
-                          <p className="card-text">
-                            {truncateDescription(description, 100)}
-                          </p>
-                        </div>
-                        <div className="ps-3 pb-3">
+              {/* Movies List */}
+              <Swiper
+                modules={[Navigation]}
+                navigation
+                className="swiper-top"
+                spaceBetween={30}
+                slidesPerView={1}
+                breakpoints={{
+                  640: {
+                    slidesPerView: 1,
+                    spaceBetween: 0,
+                  },
+                  768: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                  },
+                  1024: {
+                    slidesPerView: 4,
+                    spaceBetween: 30,
+                  },
+                }}
+              >
+                {movies?.map((movie) => (
+                  <SwiperSlide key={movie._id}>
+                    <div className="col" key={movie._id}>
+                      <div
+                        className="card border-0"
+                        style={{ height: "30rem" }}
+                      >
+                        {movie.imageURL ? (
+                          <img
+                            src={movie.imageURL}
+                            alt={movie.name}
+                            className="rounded"
+                            style={{
+                              width: "auto",
+                              height: "18rem",
+                              objectFit: "contain",
+                              aspectRatio: "3/4",
+                            }}
+                          />
+                        ) : (
+                          movie.photo && (
+                            <img
+                              src={movie.photo}
+                              alt={movie.name}
+                              className="rounded"
+                              style={{
+                                width: "auto",
+                                height: "18rem",
+                                objectFit: "fill",
+                                aspectRatio: "1/1",
+                              }}
+                            />
+                          )
+                        )}
+                        <div className="card-body p-0">
                           <Link
-                            to={`/movies/${id}`}
-                            className="btn btn-primary d-flex align-items-center"
+                            to={`/movies/${movie._id}`}
+                            className="card-title movie-heading"
                           >
-                            View
+                            {movie.name}
                           </Link>
+                          <p className="card-text">{movie.genere}</p>
                         </div>
                       </div>
                     </div>
-                  )
-                )}
-              </div>
-            )}
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

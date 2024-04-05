@@ -4,7 +4,7 @@ const BookingSchema = new Schema(
   {
     movie: {
       type: Types.ObjectId,
-      ref: "Movies",
+      ref: "Movie",
       required: true,
     },
     user: {
@@ -12,7 +12,7 @@ const BookingSchema = new Schema(
       ref: "User",
       required: true,
     },
-    numberOfTickets: {
+    numOfTickets: {
       type: String,
       required: true,
     },

@@ -85,7 +85,7 @@ const Ticket = () => {
                       </div>
                       <div className="">
                         <h2 className="fw-bold heading2">
-                          {ticketData.numberOfTickets}
+                          {ticketData.numOfTickets}
                         </h2>
                         <span className="subHeading text-muted fw-semibold">
                           TICKETS

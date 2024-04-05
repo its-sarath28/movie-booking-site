@@ -57,18 +57,46 @@ const Navbar = () => {
             )}
 
             {role === "admin" && (
-              <li className="nav-item">
-                <Link
-                  className={
-                    "nav-link fw-bolder" +
-                    ((status) => (status.isActive ? "active" : ""))
-                  }
-                  aria-current="page"
-                  to="/admin/dashboard"
-                >
-                  Dashboard
-                </Link>
-              </li>
+              <>
+                <li className="nav-item">
+                  <Link
+                    className={
+                      "nav-link fw-bolder" +
+                      ((status) => (status.isActive ? "active" : ""))
+                    }
+                    aria-current="page"
+                    to="/admin/dashboard"
+                  >
+                    Dashboard
+                  </Link>
+                </li>
+
+                <li className="nav-item">
+                  <Link
+                    className={
+                      "nav-link fw-bolder" +
+                      ((status) => (status.isActive ? "active" : ""))
+                    }
+                    aria-current="page"
+                    to="/admin/add-movie"
+                  >
+                    Add Movie
+                  </Link>
+                </li>
+
+                <li className="nav-item">
+                  <Link
+                    className={
+                      "nav-link fw-bolder" +
+                      ((status) => (status.isActive ? "active" : ""))
+                    }
+                    aria-current="page"
+                    to="/admin/add-show"
+                  >
+                    Add Shows
+                  </Link>
+                </li>
+              </>
             )}
           </ul>
 

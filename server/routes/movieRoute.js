@@ -1,80 +1,88 @@
 import express from "express";
 const movieRouter = express.Router();
 
-import { body } from "express-validator";
-
 import {
   addMovieController,
   deleteMovieController,
   editMovieController,
-  fetchAvailableDatesController,
+  fetchAvailableMovieDatesController,
+  getAllMovieNamesController,
   getAllMoviesController,
+  getAvailableTimesController,
   getSingleMovieController,
 } from "../controllers/movieController.js";
 import { isLogged } from "../middlewares/isLogged.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
+import { body } from "express-validator";
 
 // Endpoint to fetch available dates
-movieRouter.get("/available-dates", fetchAvailableDatesController);
+movieRouter.get(
+  "/available-dates/:movieId",
+  fetchAvailableMovieDatesController
+);
+
+// Endpoint to fetch available times
+movieRouter.get("/available-times/:movieId/:date", getAvailableTimesController);
 
 movieRouter.get("/", getAllMoviesController);
-
+movieRouter.get("/names", isLogged, isAdmin, getAllMovieNamesController);
+movieRouter.get("/:movieId", getSingleMovieController);
 movieRouter.post(
   "/add-movie",
   [
-    body("name").notEmpty().withMessage("Name is required."),
-    body("date").notEmpty().withMessage("Date is required."),
-    body("photo").notEmpty().withMessage("Photo is required."),
+    body("name").notEmpty().withMessage("Please enter a movie name"),
+    body("picture").custom((value, { req }) => {
+      if (!req.body.photo && !req.body.imageURL) {
+        throw new Error("Please provide a movie image.");
+      }
+      return true;
+    }),
+    body("genere")
+      .notEmpty()
+      .withMessage("Please enter a movie genere")
+      .isAlpha()
+      .withMessage("Genere can only contains alphabets"),
     body("price")
       .notEmpty()
       .withMessage("Price is required.")
       .isNumeric()
       .withMessage("Price must be a number"),
-    body("description").notEmpty().withMessage("Description is required."),
-    body("show").custom((value, { req }) => {
-      if (
-        !req.body.firstShow &&
-        !req.body.matineeShow &&
-        !req.body.eveningShow &&
-        !req.body.nightShow
-      ) {
-        throw new Error("Please select at least one show time.");
-      }
-      return true;
-    }),
+    body("description")
+      .notEmpty()
+      .withMessage("Please enter a movie description"),
   ],
   isLogged,
   isAdmin,
   addMovieController
 );
-
-movieRouter.get("/:movieId", getSingleMovieController);
-
 movieRouter.put(
   "/edit-movie/:movieId",
   [
-    body("name").notEmpty().withMessage("Name is required."),
+    body("name").notEmpty().withMessage("Please enter a movie name"),
+    body("picture").custom((value, { req }) => {
+      if (!req.body.photo && !req.body.imageURL) {
+        throw new Error("Please provide a movie image.");
+      }
+      return true;
+    }),
     body("price")
       .notEmpty()
       .withMessage("Price is required.")
       .isNumeric()
       .withMessage("Price must be a number"),
-    body("description").notEmpty().withMessage("Description is required."),
-    body("show").custom((value, { req }) => {
-      if (
-        !req.body.firstShow &&
-        !req.body.matineeShow &&
-        !req.body.eveningShow &&
-        !req.body.nightShow
-      ) {
-        throw new Error("Please select at least one show time.");
-      }
-      return true;
-    }),
+    body("description")
+      .notEmpty()
+      .withMessage("Please enter a movie description"),
   ],
+  isLogged,
+  isAdmin,
   editMovieController
 );
-
-movieRouter.delete("/delete-movie/:movieId", deleteMovieController);
+movieRouter.delete(
+  "/delete-movie/:movieId",
+  isLogged,
+  isAdmin,
+  deleteMovieController
+);
 
 export default movieRouter;

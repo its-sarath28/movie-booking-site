@@ -1,21 +1,10 @@
-import { Schema, model } from "mongoose";
+import { Schema, Types, model } from "mongoose";
 
-const MoviesSchema = new Schema(
+const ShowSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    photo: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    price: {
-      type: String,
+    movie: {
+      type: Types.ObjectId,
+      ref: "Movie",
       required: true,
     },
     firstShow: {
@@ -44,4 +33,4 @@ const MoviesSchema = new Schema(
   }
 );
 
-export default model("Movies", MoviesSchema);
+export default model("Show", ShowSchema);

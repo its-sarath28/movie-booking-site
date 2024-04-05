@@ -12,9 +12,10 @@ import { dbConnect } from "./config/dbConnect.js";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 
 import authRouter from "./routes/authRoute.js";
-import movieRouter from "./routes/movieRoute.js";
+import showRouter from "./routes/showRoute.js";
 import bookingRouter from "./routes/bookingRoute.js";
 import userRouter from "./routes/userRoute.js";
+import movieRouter from "./routes/movieRoute.js";
 
 dotenv.config();
 dbConnect();
@@ -37,6 +38,7 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/movies", movieRouter);
+app.use("/api/v1/shows", showRouter);
 app.use("/api/v1/bookings", bookingRouter);
 app.use("/api/v1/users", userRouter);
 

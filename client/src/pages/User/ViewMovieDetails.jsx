@@ -3,11 +3,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import HashLoader from "react-spinners/HashLoader";
+import { Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+
+import "swiper/swiper-bundle.css";
 
 import { BASE_URL } from "../../config";
 import { UserContext } from "../../context/userContext";
 
-const ViewShowDetails = () => {
+const ViewMovieDetails = () => {
   const [movieData, setMovieData] = useState({
     name: "",
     description: "",
@@ -17,11 +21,14 @@ const ViewShowDetails = () => {
     matineeShow: null,
     eveningShow: null,
     nightShow: null,
-    ticketNumber: "",
   });
 
+  const [movieDates, setMovieDates] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [movieTimes, setMovieTimes] = useState([]);
   const [selectedTime, setSelectedTime] = useState(null);
   const [ticketPrice, setTicketPrice] = useState(0);
+  const [numOfTickets, setNumOfTickets] = useState("");
 
   const { isLoggedIn } = useContext(UserContext);
 
@@ -48,8 +55,8 @@ const ViewShowDetails = () => {
         if (res.status === 200) {
           setMovieData(res.data);
           setTicketPrice(res.data.price);
+          console.log(res.data.price);
           setIsLoading(false);
-          // console.log(res.data);
         }
       };
 
@@ -61,8 +68,53 @@ const ViewShowDetails = () => {
     }
   }, []);
 
-  const handleInputChange = (e) => {
-    setMovieData({ ...movieData, [e.target.name]: e.target.value });
+  useEffect(() => {
+    try {
+      setIsLoading(true);
+      const getMovieDates = async () => {
+        const res = await axios.get(
+          `${BASE_URL}/movies/available-dates/${movieId}`
+        );
+
+        if (res.status === 200) {
+          setMovieDates(res.data.dates);
+          if (res.data.dates.length > 0) {
+            setSelectedDate(res.data.dates[0]);
+          }
+          setIsLoading(false);
+        }
+      };
+
+      getMovieDates();
+    } catch (err) {
+      setIsLoading(false);
+      console.error(err);
+      toast.error(`Error getting movie dates: ${err}`);
+    }
+  }, []);
+
+  const handleDateSelect = async (date, e) => {
+    e.preventDefault();
+    setSelectedDate(date);
+
+    try {
+      setIsLoading(true);
+      const res = await axios.get(
+        `${BASE_URL}/movies/available-times/${movieId}/${date}`
+      );
+
+      if (res.status === 200) {
+        setMovieTimes(res.data.times);
+        // Set the default selected date only after getting the available times
+        // setSelectedDate(res.data.times.date);
+
+        setIsLoading(false);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      console.error(err);
+      toast.error(`Error getting movie times for ${date}: ${err}`);
+    }
   };
 
   const handleTimeSelect = (time, e) => {
@@ -84,22 +136,23 @@ const ViewShowDetails = () => {
   const bookTicketHandler = async (e) => {
     e.preventDefault();
 
-    const ticketNumber = movieData.ticketNumber;
-    if (!selectedTime) {
-      toast.error(`Please select a show time`);
-      return;
-    }
-
-    if (isNaN(ticketNumber) || ticketNumber < 1) {
-      toast.error(`Please enter a valid Number of tickets`);
-      return;
-    }
-
-    const amount = ticketPrice * movieData.ticketNumber * 100;
-    const currency = "INR";
-    const receiptId = generateReceiptId();
-
     try {
+      if (!selectedTime) {
+        toast.error(`Please select a show time`);
+        return;
+      }
+
+      if (isNaN(numOfTickets) || numOfTickets < 1) {
+        toast.error(`Please enter a valid Number of tickets`);
+        return;
+      }
+
+      const amount = ticketPrice * numOfTickets * 100;
+      const currency = "INR";
+      const receiptId = generateReceiptId();
+
+      console.log(amount, currency, receiptId);
+
       setIsLoading(true);
       const res = await axios.post(
         `${BASE_URL}/bookings/book-ticket`,
@@ -132,9 +185,9 @@ const ViewShowDetails = () => {
           const body = {
             ...res,
             movieId,
-            numberOfTickets: movieData.ticketNumber,
+            numOfTickets,
             showTime: selectedTime,
-            showDate: movieData.date,
+            showDate: selectedDate,
           };
           try {
             const validateResponse = await axios.post(
@@ -186,8 +239,8 @@ const ViewShowDetails = () => {
 
       rzp1.open();
       e.preventDefault();
-    } catch (error) {
-      console.error("Error booking ticket:", error);
+    } catch (err) {
+      console.error("Error booking ticket:", err);
     }
   };
 
@@ -198,12 +251,34 @@ const ViewShowDetails = () => {
           <div className="ps-2 ps-md-5">
             <h3 className="fw-semibold fs-4 mb-4 py-3">Movie details</h3>
 
-            <figure className="movie-img">
-              <img
-                src={movieData.photo}
-                alt="movie"
-                className="h-100 object-fit-cover rounded"
-              />
+            <figure className="">
+              {movieData.imageURL ? (
+                <img
+                  src={movieData.imageURL}
+                  alt={movieData.name}
+                  className="rounded-top"
+                  style={{
+                    width: "auto",
+                    height: "25rem",
+                    objectFit: "fill",
+                    aspectRatio: "1/1",
+                  }}
+                />
+              ) : (
+                movieData.photo && (
+                  <img
+                    src={movieData.photo}
+                    alt={movieData.name}
+                    className="rounded-top"
+                    style={{
+                      width: "auto",
+                      height: "25rem",
+                      objectFit: "fill",
+                      aspectRatio: "1/1",
+                    }}
+                  />
+                )
+              )}
             </figure>
 
             <h3 className="fw-semibold fs-5 mt-5">About the movie</h3>
@@ -219,6 +294,48 @@ const ViewShowDetails = () => {
             onSubmit={bookTicketHandler}
             className="p-3 border border-2 rounded"
           >
+            {/* Date Selection */}
+            <div className="mb-3">
+              <h5 className="mb-3">
+                Select Date<span className="text-danger">*</span>
+              </h5>
+              <Swiper
+                modules={[Pagination]}
+                spaceBetween={30}
+                slidesPerView={1}
+                pagination={{ clickable: true }}
+                breakpoints={{
+                  640: {
+                    slidesPerView: 1,
+                    spaceBetween: 0,
+                  },
+                  768: {
+                    slidesPerView: 2,
+                    spaceBetween: 20,
+                  },
+                  1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                  },
+                }}
+              >
+                {movieDates?.map((date, index) => (
+                  <SwiperSlide key={index}>
+                    <button
+                      className={`btn ${
+                        selectedDate === date
+                          ? "btn-primary"
+                          : "btn-outline-primary"
+                      }`}
+                      onClick={(e) => handleDateSelect(date, e)}
+                    >
+                      {date}
+                    </button>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+
             {/* Time selection */}
             <div className="mb-3">
               <h5 className="mb-3">
@@ -230,12 +347,12 @@ const ViewShowDetails = () => {
                   className={`btn btn-outline-primary me-2 mb-2 ${
                     selectedTime === time ? "active" : ""
                   }`}
-                  onClick={(e) => handleTimeSelect(time, e)} // Pass event here
+                  onClick={(e) => handleTimeSelect(time, e)}
                   disabled={
-                    (time === "11:30 AM" && !movieData.firstShow) ||
-                    (time === "02:30 PM" && !movieData.matineeShow) ||
-                    (time === "5 PM" && !movieData.eveningShow) ||
-                    (time === "9 PM" && !movieData.nightShow)
+                    (time === "11:30 AM" && !movieTimes.firstShow) ||
+                    (time === "02:30 PM" && !movieTimes.matineeShow) ||
+                    (time === "5 PM" && !movieTimes.eveningShow) ||
+                    (time === "9 PM" && !movieTimes.nightShow)
                   }
                 >
                   {time}
@@ -256,8 +373,8 @@ const ViewShowDetails = () => {
                 placeholder="Number of tickets"
                 className="form-control"
                 name="ticketNumber"
-                value={movieData.ticketNumber}
-                onChange={handleInputChange}
+                value={numOfTickets}
+                onChange={(e) => setNumOfTickets(e.target.value)}
               />
               {/* {errors.ticketNumber && movieData.ticketNumber < 1 && (
                 <p className="text-danger">
@@ -267,7 +384,7 @@ const ViewShowDetails = () => {
             </div>
 
             <div className="mt-3 text-start">
-              <button className="btn btn-primary">
+              <button className="btn btn-primary" type="submit">
                 {isLoading ? (
                   <HashLoader size={25} color="#eee" />
                 ) : (
@@ -282,4 +399,4 @@ const ViewShowDetails = () => {
   );
 };
 
-export default ViewShowDetails;
+export default ViewMovieDetails;
