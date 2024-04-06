@@ -44,6 +44,45 @@ const MyBookings = () => {
     }
   }, [token, navigate]);
 
+  // const handleDownloadPDF = async (bookingId) => {
+  //   try {
+  //     setLoadingStates((prevLoadingStates) => ({
+  //       ...prevLoadingStates,
+  //       [bookingId]: true,
+  //     }));
+  //     const res = await axios.get(
+  //       `${BASE_URL}/users/generate-ticket/${bookingId}`,
+  //       {
+  //         withCredentials: true,
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         // Specify responseType as 'blob' to receive binary data
+  //         responseType: "blob",
+  //       }
+  //     );
+
+  //     if (res.status === 200) {
+  //       // Create a blob URL from the binary data received
+  //       const pdfUrl = URL.createObjectURL(
+  //         new Blob([res.data], { type: "application/pdf" })
+  //       );
+  //       // Open the PDF in a new tab
+  //       window.open(pdfUrl, "_blank");
+  //     } else {
+  //       setIsLoading(false);
+  //       console.log("Download failed");
+  //     }
+  //   } catch (err) {
+  //     console.log(`Error downloading PDF from client: ${err}`);
+  //   } finally {
+  //     setLoadingStates((prevLoadingStates) => ({
+  //       ...prevLoadingStates,
+  //       [bookingId]: false,
+  //     }));
+  //   }
+  // };
+
   const handleDownloadPDF = async (bookingId) => {
     try {
       setLoadingStates((prevLoadingStates) => ({
@@ -64,11 +103,19 @@ const MyBookings = () => {
 
       if (res.status === 200) {
         // Create a blob URL from the binary data received
-        const pdfUrl = URL.createObjectURL(
-          new Blob([res.data], { type: "application/pdf" })
-        );
-        // Open the PDF in a new tab
-        window.open(pdfUrl, "_blank");
+        const blob = new Blob([res.data], { type: "application/pdf" });
+        const pdfUrl = URL.createObjectURL(blob);
+
+        // Create a link element
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.setAttribute("download", `ticket_${bookingId}.pdf`);
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+        URL.revokeObjectURL(pdfUrl);
       } else {
         setIsLoading(false);
         console.log("Download failed");

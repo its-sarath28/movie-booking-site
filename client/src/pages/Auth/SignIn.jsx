@@ -92,6 +92,7 @@ const SignIn = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
+                  autoFocus
                 />
                 {errors.email && <p className="text-danger">{errors.email}</p>}
               </div>

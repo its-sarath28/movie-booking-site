@@ -40,11 +40,11 @@ const ViewMovieDetails = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/auth/sign-in");
-    }
-  }, [token, navigate]);
+  // useEffect(() => {
+  //   if (!token) {
+  //     navigate("/auth/sign-in");
+  //   }
+  // }, [token, navigate]);
 
   useEffect(() => {
     try {
@@ -135,6 +135,11 @@ const ViewMovieDetails = () => {
 
   const bookTicketHandler = async (e) => {
     e.preventDefault();
+
+    if (!token) {
+      navigate("/auth/sign-in");
+      return;
+    }
 
     try {
       if (!selectedTime) {
