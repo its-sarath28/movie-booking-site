@@ -29,7 +29,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 //Middleware
-app.use(express.static(path.join(__dirname, "/index/public")));
+app.use(express.static(path.join(__dirname, "server", "public")));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
