@@ -3,9 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import path from "path";
-
-import { fileURLToPath } from "url"; // Import fileURLToPath
-import { dirname } from "path"; // Import dirname
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 import { dbConnect } from "./config/dbConnect.js";
 
@@ -64,3 +63,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running in port ${PORT}`);
 });
+
+export default app;
