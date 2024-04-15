@@ -37,7 +37,7 @@ const Home = () => {
 
   return (
     <>
-      {/* <Hero /> */}
+      <Hero />
       <div className="container-fluid px-2">
         <div className="row mx-0 mt-5">
           {/* Movies Section */}
@@ -50,75 +50,77 @@ const Home = () => {
               )}
 
               {/* Movies List */}
-              <Swiper
-                modules={[Navigation]}
-                navigation
-                className="swiper-top"
-                spaceBetween={30}
-                slidesPerView={1}
-                breakpoints={{
-                  640: {
-                    slidesPerView: 1,
-                    spaceBetween: 0,
-                  },
-                  768: {
-                    slidesPerView: 2,
-                    spaceBetween: 20,
-                  },
-                  1024: {
-                    slidesPerView: 4,
-                    spaceBetween: 30,
-                  },
-                }}
-              >
-                {movies?.map((movie) => (
-                  <SwiperSlide key={movie._id}>
-                    <div className="col" key={movie._id}>
-                      <div
-                        className="card border-0"
-                        style={{ height: "30rem" }}
-                      >
-                        {movie.imageURL ? (
-                          <img
-                            src={movie.imageURL}
-                            alt={movie.name}
-                            className="rounded"
-                            style={{
-                              width: "auto",
-                              height: "18rem",
-                              objectFit: "contain",
-                              aspectRatio: "3/4",
-                            }}
-                          />
-                        ) : (
-                          movie.photo && (
+              {!isLoading && (
+                <Swiper
+                  modules={[Navigation]}
+                  navigation
+                  className="swiper-top"
+                  spaceBetween={30}
+                  slidesPerView={1}
+                  breakpoints={{
+                    640: {
+                      slidesPerView: 1,
+                      spaceBetween: 0,
+                    },
+                    768: {
+                      slidesPerView: 2,
+                      spaceBetween: 20,
+                    },
+                    1024: {
+                      slidesPerView: 4,
+                      spaceBetween: 30,
+                    },
+                  }}
+                >
+                  {movies?.map((movie) => (
+                    <SwiperSlide key={movie._id}>
+                      <div className="col" key={movie._id}>
+                        <div
+                          className="card border-0"
+                          style={{ height: "30rem" }}
+                        >
+                          {movie.imageURL ? (
                             <img
-                              src={movie.photo}
+                              src={movie.imageURL}
                               alt={movie.name}
                               className="rounded"
                               style={{
                                 width: "auto",
                                 height: "18rem",
-                                objectFit: "fill",
-                                aspectRatio: "1/1",
+                                objectFit: "contain",
+                                aspectRatio: "3/4",
                               }}
                             />
-                          )
-                        )}
-                        <div className="card-body p-0">
-                          <Link
-                            to={`/movies/${movie._id}`}
-                            className="card-title movie-heading"
-                          >
-                            {movie.name}
-                          </Link>
-                          <p className="card-text">{movie.genere}</p>
+                          ) : (
+                            movie.photo && (
+                              <img
+                                src={movie.photo}
+                                alt={movie.name}
+                                className="rounded"
+                                style={{
+                                  width: "auto",
+                                  height: "18rem",
+                                  objectFit: "fill",
+                                  aspectRatio: "1/1",
+                                }}
+                              />
+                            )
+                          )}
+                          <div className="card-body p-0">
+                            <Link
+                              to={`/movies/${movie._id}`}
+                              className="card-title movie-heading"
+                            >
+                              {movie.name}
+                            </Link>
+                            <p className="card-text">{movie.genere}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              )}
             </div>
           </div>
         </div>

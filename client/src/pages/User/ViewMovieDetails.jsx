@@ -40,12 +40,6 @@ const ViewMovieDetails = () => {
 
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   if (!token) {
-  //     navigate("/auth/sign-in");
-  //   }
-  // }, [token, navigate]);
-
   useEffect(() => {
     try {
       setIsLoading(true);
@@ -78,9 +72,9 @@ const ViewMovieDetails = () => {
 
         if (res.status === 200) {
           setMovieDates(res.data.dates);
-          if (res.data.dates.length > 0) {
-            setSelectedDate(res.data.dates[0]);
-          }
+          // if (res.data.dates.length > 0) {
+          //   setSelectedDate(res.data.dates[0]);
+          // }
           setIsLoading(false);
         }
       };
@@ -105,8 +99,6 @@ const ViewMovieDetails = () => {
 
       if (res.status === 200) {
         setMovieTimes(res.data.times);
-        // Set the default selected date only after getting the available times
-        // setSelectedDate(res.data.times.date);
 
         setIsLoading(false);
       }
@@ -184,7 +176,7 @@ const ViewMovieDetails = () => {
         currency,
         name: "BookMyMovie",
         description: "Test transaction",
-        // image: "https://i.ibb..co/5Y3m33n/test.png",
+
         order_id: order.id,
         handler: async (res) => {
           const body = {
@@ -208,7 +200,6 @@ const ViewMovieDetails = () => {
             );
 
             if (validateResponse.status === 200) {
-              // toast.success(validateResponse.data.bookingId);
               setIsLoading(false);
               console.log(`validateResponse`, validateResponse.data);
               navigate(`/show-ticket/${validateResponse.data.bookingId}`);
@@ -218,13 +209,7 @@ const ViewMovieDetails = () => {
             toast.error(`Payment failed`);
           }
         },
-        // prefill: {
-        //   name: "",
-        //   email: "",
-        // },
-        // notes: {
-        //   address: "",
-        // },
+
         theme: {
           color: "43399cc",
         },
@@ -299,104 +284,106 @@ const ViewMovieDetails = () => {
             onSubmit={bookTicketHandler}
             className="p-3 border border-2 rounded"
           >
-            {/* Date Selection */}
-            <div className="mb-3">
-              <h5 className="mb-3">
-                Select Date<span className="text-danger">*</span>
-              </h5>
-              <Swiper
-                modules={[Pagination]}
-                spaceBetween={30}
-                slidesPerView={1}
-                pagination={{ clickable: true }}
-                breakpoints={{
-                  640: {
-                    slidesPerView: 1,
-                    spaceBetween: 0,
-                  },
-                  768: {
-                    slidesPerView: 2,
-                    spaceBetween: 20,
-                  },
-                  1024: {
-                    slidesPerView: 3,
-                    spaceBetween: 30,
-                  },
-                }}
-              >
-                {movieDates?.map((date, index) => (
-                  <SwiperSlide key={index}>
+            {movieDates?.length === 0 ? (
+              <p className="mb-0 text-center fw-bold">No Shows scheduled!</p>
+            ) : (
+              <>
+                {/* Date Selection */}
+                <div className="mb-3">
+                  <h5 className="mb-3">
+                    Select Date<span className="text-danger">*</span>
+                  </h5>
+
+                  <Swiper
+                    modules={[Pagination]}
+                    spaceBetween={30}
+                    slidesPerView={1}
+                    pagination={{ clickable: true }}
+                    breakpoints={{
+                      640: {
+                        slidesPerView: 1,
+                        spaceBetween: 0,
+                      },
+                      768: {
+                        slidesPerView: 2,
+                        spaceBetween: 20,
+                      },
+                      1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 30,
+                      },
+                    }}
+                  >
+                    {movieDates?.map((date, index) => (
+                      <SwiperSlide key={index}>
+                        <button
+                          className={`btn ${
+                            selectedDate === date
+                              ? "btn-primary"
+                              : "btn-outline-primary"
+                          }`}
+                          onClick={(e) => handleDateSelect(date, e)}
+                        >
+                          {date}
+                        </button>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
+
+                {/* Time selection */}
+                <div className="mb-3">
+                  <h5 className="mb-3">
+                    Select Time<span className="text-danger">*</span>
+                  </h5>
+                  {times.map((time, index) => (
                     <button
-                      className={`btn ${
-                        selectedDate === date
-                          ? "btn-primary"
-                          : "btn-outline-primary"
+                      key={index}
+                      className={`btn btn-outline-primary me-2 mb-2 ${
+                        selectedTime === time ? "active" : ""
                       }`}
-                      onClick={(e) => handleDateSelect(date, e)}
+                      onClick={(e) => handleTimeSelect(time, e)}
+                      disabled={
+                        (time === "11:30 AM" && !movieTimes.firstShow) ||
+                        (time === "02:30 PM" && !movieTimes.matineeShow) ||
+                        (time === "5 PM" && !movieTimes.eveningShow) ||
+                        (time === "9 PM" && !movieTimes.nightShow)
+                      }
                     >
-                      {date}
+                      {time}
                     </button>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
+                  ))}
+                </div>
 
-            {/* Time selection */}
-            <div className="mb-3">
-              <h5 className="mb-3">
-                Select Time<span className="text-danger">*</span>
-              </h5>
-              {times.map((time, index) => (
-                <button
-                  key={index}
-                  className={`btn btn-outline-primary me-2 mb-2 ${
-                    selectedTime === time ? "active" : ""
-                  }`}
-                  onClick={(e) => handleTimeSelect(time, e)}
-                  disabled={
-                    (time === "11:30 AM" && !movieTimes.firstShow) ||
-                    (time === "02:30 PM" && !movieTimes.matineeShow) ||
-                    (time === "5 PM" && !movieTimes.eveningShow) ||
-                    (time === "9 PM" && !movieTimes.nightShow)
-                  }
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
+                {/* Number of tickets */}
+                <div>
+                  <label htmlFor="ticket" className="form-label">
+                    <h5 className="mb-2">
+                      Number of tickets<span className="text-danger">*</span>
+                    </h5>
+                  </label>
 
-            {/* Number of tickets */}
-            <div>
-              <label htmlFor="ticket" className="form-label">
-                <h5 className="mb-2">
-                  Number of tickets<span className="text-danger">*</span>
-                </h5>
-              </label>
+                  <input
+                    type="text"
+                    placeholder="Number of tickets"
+                    className="form-control"
+                    name="ticketNumber"
+                    value={numOfTickets}
+                    onChange={(e) => setNumOfTickets(e.target.value)}
+                  />
+                </div>
 
-              <input
-                type="text"
-                placeholder="Number of tickets"
-                className="form-control"
-                name="ticketNumber"
-                value={numOfTickets}
-                onChange={(e) => setNumOfTickets(e.target.value)}
-              />
-              {/* {errors.ticketNumber && movieData.ticketNumber < 1 && (
-                <p className="text-danger">
-                  Number of tickets must be a valid number greater than 0.
-                </p>
-              )} */}
-            </div>
-
-            <div className="mt-3 text-start">
-              <button className="btn btn-primary" type="submit">
-                {isLoading ? (
-                  <HashLoader size={25} color="#eee" />
-                ) : (
-                  `Book ticket`
-                )}
-              </button>
-            </div>
+                <div className="mt-3 text-start">
+                  <button className="btn btn-primary" type="submit">
+                    {isLoading ? (
+                      <HashLoader size={25} color="#eee" />
+                    ) : (
+                      `Book ticket`
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
           </form>
         </div>
       </div>

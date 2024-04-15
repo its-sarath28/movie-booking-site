@@ -49,7 +49,7 @@ const ViewShows = ({ shows }) => {
     <>
       <div
         className="table-responsive"
-        style={{ maxHeight: "30rem", overflowY: "auto" }}
+        style={{ maxHeight: "22rem", overflowY: "auto" }}
       >
         <table className="table">
           <thead>

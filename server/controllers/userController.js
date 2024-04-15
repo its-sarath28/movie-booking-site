@@ -66,7 +66,7 @@ export const generateTicketPDFController = async (req, res) => {
     const template = await readFileAsync("../server/views/Ticket.ejs", "utf8");
 
     // Generate QR code
-    const QR_DATA = `Movie name: ${booking.movie.name} \n Show Date: ${booking.showDate} \n Show Time: ${booking.showTime} \n Number of Tickets: ${booking.numberOfTickets} \n Booking Id: ${booking._id}`;
+    const QR_DATA = `Movie name: ${booking.movie.name} \n Show Date: ${booking.showDate} \n Show Time: ${booking.showTime} \n Number of Tickets: ${booking.numOfTickets} \n Booking Id: ${booking._id}`;
     const options = { format: "png", width: 150 };
 
     const qrCode = await QRCode.toDataURL(QR_DATA, options);

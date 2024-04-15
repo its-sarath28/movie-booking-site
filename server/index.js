@@ -33,12 +33,14 @@ app.use(express.static(path.join(__dirname, "server", "public")));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-// app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(
   cors({
-    origin: ["https://movie-booking-site-theta.vercel.app"],
-    methods: ["POST", "GET", "PUT", "DELETE"],
+    origin: [
+      "http://localhost:5173",
+      "https://movie-booking-site-theta.vercel.app",
+    ],
     credentials: true,
+    methods: ["POST", "GET", "PUT", "DELETE"],
   })
 );
 
