@@ -49,7 +49,7 @@ const ViewMovieDetails = () => {
         if (res.status === 200) {
           setMovieData(res.data);
           setTicketPrice(res.data.price);
-          console.log(res.data.price);
+          // console.log(res.data.price);
           setIsLoading(false);
         }
       };
@@ -148,7 +148,7 @@ const ViewMovieDetails = () => {
       const currency = "INR";
       const receiptId = generateReceiptId();
 
-      console.log(amount, currency, receiptId);
+      // console.log(amount, currency, receiptId);
 
       setIsLoading(true);
       const res = await axios.post(
@@ -201,7 +201,7 @@ const ViewMovieDetails = () => {
 
             if (validateResponse.status === 200) {
               setIsLoading(false);
-              console.log(`validateResponse`, validateResponse.data);
+              // console.log(`validateResponse`, validateResponse.data);
               navigate(`/show-ticket/${validateResponse.data.bookingId}`);
             }
           } catch (err) {

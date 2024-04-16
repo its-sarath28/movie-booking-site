@@ -55,7 +55,7 @@ const EditShow = () => {
           });
 
           setShowData(res.data);
-          console.log(res.data, "single show");
+          // console.log(res.data, "single show");
         };
 
         getShow();
@@ -78,7 +78,7 @@ const EditShow = () => {
         });
 
         if (res.status === 200) {
-          console.log(res.data, "Movie names");
+          // console.log(res.data, "Movie names");
           setMovieNames(res.data);
           setIsLoading(false);
         }
@@ -120,7 +120,7 @@ const EditShow = () => {
   const editShowHandler = async (e) => {
     e.preventDefault();
 
-    console.log(showData);
+    // console.log(showData);
     try {
       setIsLoading(true);
       const res = await axios.put(

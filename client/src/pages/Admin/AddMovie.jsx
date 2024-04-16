@@ -51,7 +51,7 @@ const AddMovie = () => {
   const addMovieHandler = async (e) => {
     e.preventDefault();
 
-    console.log(movieData);
+    // console.log(movieData);
     try {
       setIsLoading(true);
 

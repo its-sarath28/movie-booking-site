@@ -52,7 +52,7 @@ const AddShow = () => {
           });
 
           if (res.status === 200) {
-            console.log(res.data, "Movie names");
+            // console.log(res.data, "Movie names");
             setMovieNames(res.data);
             setIsLoading(false);
           }
@@ -97,7 +97,7 @@ const AddShow = () => {
   const addMovieHandler = async (e) => {
     e.preventDefault();
 
-    console.log(showData);
+    // console.log(showData);
     try {
       setIsLoading(true);
 

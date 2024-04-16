@@ -29,7 +29,7 @@ const Hero = () => {
             <div className="carousel-inner">
               <div className="carousel-item active">
                 <img
-                  src="https://i.pinimg.com/474x/6f/cc/ae/6fccae598fe389179cdc04085c4c6139.jpg"
+                  src="https://i.pinimg.com/474x/3f/ff/d7/3fffd702d48852ede79ed71d04f36a2b.jpg"
                   className="d-block w-50 mx-auto object-fit-cover"
                   style={{ height: "30rem" }}
                   alt="..."

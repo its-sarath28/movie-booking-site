@@ -23,7 +23,7 @@ const Home = () => {
 
         if (res.status === 200) {
           setMovies(res.data);
-          console.log(res.data);
+          // console.log(res.data);
           setIsLoading(false);
         }
       };

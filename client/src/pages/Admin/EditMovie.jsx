@@ -53,7 +53,7 @@ const EditMovie = () => {
             setCurrentImage(res.data?.photo);
             setImageUrl(res.data?.imageURL);
 
-            console.log(res.data, "single movie data");
+            // console.log(res.data, "single movie data");
             setIsLoading(false);
           }
         };
@@ -79,7 +79,7 @@ const EditMovie = () => {
   const editMovieHandler = async (e) => {
     e.preventDefault();
 
-    console.log(movieData);
+    // console.log(movieData);
     try {
       setIsLoading(true);
 
