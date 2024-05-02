@@ -89,6 +89,7 @@ const MyBookings = () => {
         ...prevLoadingStates,
         [bookingId]: true,
       }));
+      console.log("click one", bookingId);
       const res = await axios.get(
         `${BASE_URL}/users/generate-ticket/${bookingId}`,
         {
